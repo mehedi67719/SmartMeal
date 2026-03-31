@@ -2,6 +2,8 @@
 
 import { RegisterPageData } from '@/Types/registerpagetype';
 import React, { useState } from 'react';
+import { FiUser, FiMail, FiLock, FiCheckCircle, FiHome, FiKey } from 'react-icons/fi';
+import { FaUtensils, FaHamburger, FaPizzaSlice, FaFish, FaLeaf, FaCookie } from 'react-icons/fa';
 
 const Register = () => {
   const [formData, setFormData] = useState<RegisterPageData>({
@@ -114,276 +116,308 @@ const Register = () => {
     return 'Strong';
   };
 
+  const foodIcons = [FaHamburger, FaPizzaSlice, FaFish, FaLeaf, FaCookie];
+
   return (
-    <div className="h-screen bg-gradient-to-br from-emerald-50 via-white to-cyan-50 flex items-center justify-center p-2 overflow-hidden">
-      <div className="absolute top-0 left-0 w-64 h-64 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-64 h-64 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-
-      <div className="w-full max-w-md relative z-10 h-auto max-h-[98vh] overflow-y-auto scrollbar-hide">
-        <div className="backdrop-blur-xl bg-white/90 border border-white/40 rounded-3xl shadow-2xl overflow-hidden">
-          <div className="relative bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 px-6 py-5 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
-            <div className="relative text-center">
-              <div className="inline-flex items-center justify-center mb-2">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-              </div>
-              <h2 className="text-2xl font-black text-white drop-shadow-lg">
-                SmartMeal
-              </h2>
-              <p className="text-emerald-100 text-xs font-semibold mt-1">
-                Join the Smart Meal Community
-              </p>
-            </div>
+    <div className="min-h-screen w-full flex items-center justify-center p-4">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {foodIcons.map((Icon, index) => (
+          <div
+            key={index}
+            className="absolute animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${index * 2}s`,
+              opacity: 0.05,
+            }}
+          >
+            <Icon className="w-16 h-16 text-emerald-600" />
           </div>
+        ))}
+      </div>
 
-          <form onSubmit={handleSubmit} className="p-5 space-y-3">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                placeholder="Enter your name"
-                className={`w-full px-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
-                  errors.name
-                    ? 'border-red-400 bg-red-50 focus:border-red-500'
-                    : 'border-gray-200 bg-gray-50/50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
-                }`}
-                value={formData.name}
-                onChange={handleChange}
-              />
-              {errors.name && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.name}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                className={`w-full px-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
-                  errors.email
-                    ? 'border-red-400 bg-red-50 focus:border-red-500'
-                    : 'border-gray-200 bg-gray-50/50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
-                }`}
-                value={formData.email}
-                onChange={handleChange}
-              />
-              {errors.email && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.email}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                Account Type
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, accountType: 'member'})}
-                  className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                    formData.accountType === 'member'
-                      ? 'bg-emerald-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  Member
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, accountType: 'controller'})}
-                  className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                    formData.accountType === 'controller'
-                      ? 'bg-emerald-600 text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  Controller
-                </button>
-              </div>
-            </div>
-
-            {formData.accountType === 'controller' && (
-              <div className="space-y-2 animate-fadeIn">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    Mess Name
-                  </label>
-                  <input
-                    type="text"
-                    name="messName"
-                    placeholder="Your mess name"
-                    className={`w-full px-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
-                      errors.messName
-                        ? 'border-red-400 bg-red-50 focus:border-red-500'
-                        : 'border-gray-200 bg-gray-50/50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
-                    }`}
-                    value={formData.messName}
-                    onChange={handleChange}
-                  />
-                  {errors.messName && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.messName}</p>}
+      <div className="w-full max-w-5xl relative z-10">
+        <div className="bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden">
+          <div className="grid md:grid-cols-2">
+            <div className="relative bg-gradient-to-br from-emerald-600 via-green-600 to-emerald-700 p-8 flex flex-col justify-center items-center text-center overflow-hidden">
+              <div className="absolute inset-0 bg-black/10"></div>
+              <div className="relative z-10">
+                <div className="mb-6">
+                  <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FaUtensils className="w-12 h-12 text-white" />
+                  </div>
+                  <h2 className="text-3xl font-black text-white mb-2">SmartMeal</h2>
+                  <p className="text-emerald-100 text-sm">Delicious meals, smart choices</p>
+                </div>
+                
+                <div className="space-y-4 mt-8">
+                  <div className="flex items-center justify-center gap-3">
+                    <FaHamburger className="w-8 h-8 text-white/80" />
+                    <FaPizzaSlice className="w-8 h-8 text-white/80" />
+                    <FaFish className="w-8 h-8 text-white/80" />
+                  </div>
+                  <p className="text-white/90 text-sm">
+                    Join thousands of food lovers who trust SmartMeal for their daily dining needs
+                  </p>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6-4h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2zm10-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2h8z" />
-                    </svg>
-                    Secret Code
-                  </label>
-                  <input
-                    type="text"
-                    name="messSecretCode"
-                    placeholder="Enter security code"
-                    className={`w-full px-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
-                      errors.messSecretCode
-                        ? 'border-red-400 bg-red-50 focus:border-red-500'
-                        : 'border-gray-200 bg-gray-50/50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
-                    }`}
-                    value={formData.messSecretCode}
-                    onChange={handleChange}
-                  />
-                  {errors.messSecretCode && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.messSecretCode}</p>}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6-4h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2zm10-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2h8z" />
-                </svg>
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                placeholder="Create strong password"
-                className={`w-full px-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
-                  errors.password
-                    ? 'border-red-400 bg-red-50 focus:border-red-500'
-                    : 'border-gray-200 bg-gray-50/50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
-                }`}
-                value={formData.password}
-                onChange={handleChange}
-              />
-              {formData.password && (
-                <div className="mt-1">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-300 ${getPasswordStrengthColor()}`}
-                        style={{ width: `${(passwordStrength / 4) * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-xs font-bold text-gray-700">
-                      {getPasswordStrengthText()}
+                <div className="mt-8 flex flex-wrap justify-center gap-2">
+                  {['Fresh', 'Healthy', 'Tasty', 'Quick'].map((tag) => (
+                    <span key={tag} className="px-3 py-1 bg-white/20 rounded-full text-xs text-white font-semibold">
+                      {tag}
                     </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 max-h-[80vh] overflow-y-auto scrollbar-hide">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-800">Create Account</h3>
+                <p className="text-gray-600 text-sm mt-1">Join the SmartMeal community today</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <FiUser className="w-3 h-3" />
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      name="name"
+                      placeholder="Enter your name"
+                      className={`w-full pl-10 pr-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
+                        errors.name
+                          ? 'border-red-400 bg-red-50 focus:border-red-500'
+                          : 'border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
+                      }`}
+                      value={formData.name}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  {errors.name && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.name}</p>}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <FiMail className="w-3 h-3" />
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="your@email.com"
+                      className={`w-full pl-10 pr-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
+                        errors.email
+                          ? 'border-red-400 bg-red-50 focus:border-red-500'
+                          : 'border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
+                      }`}
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  {errors.email && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.email}</p>}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <FiUser className="w-3 h-3" />
+                    Account Type
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({...formData, accountType: 'member'})}
+                      className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        formData.accountType === 'member'
+                          ? 'bg-emerald-600 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      Member
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({...formData, accountType: 'controller'})}
+                      className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        formData.accountType === 'controller'
+                          ? 'bg-emerald-600 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      Controller
+                    </button>
                   </div>
                 </div>
-              )}
-              {errors.password && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.password}</p>}
+
+                {formData.accountType === 'controller' && (
+                  <div className="space-y-3 animate-fadeIn">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                        <FiHome className="w-3 h-3" />
+                        Mess Name
+                      </label>
+                      <div className="relative">
+                        <FiHome className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                          type="text"
+                          name="messName"
+                          placeholder="Your mess name"
+                          className={`w-full pl-10 pr-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
+                            errors.messName
+                              ? 'border-red-400 bg-red-50 focus:border-red-500'
+                              : 'border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
+                          }`}
+                          value={formData.messName}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      {errors.messName && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.messName}</p>}
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                        <FiKey className="w-3 h-3" />
+                        Secret Code
+                      </label>
+                      <div className="relative">
+                        <FiKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                          type="text"
+                          name="messSecretCode"
+                          placeholder="Enter security code"
+                          className={`w-full pl-10 pr-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
+                            errors.messSecretCode
+                              ? 'border-red-400 bg-red-50 focus:border-red-500'
+                              : 'border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
+                          }`}
+                          value={formData.messSecretCode}
+                          onChange={handleChange}
+                        />
+                      </div>
+                      {errors.messSecretCode && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.messSecretCode}</p>}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <FiLock className="w-3 h-3" />
+                    Password
+                  </label>
+                  <div className="relative">
+                    <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Create strong password"
+                      className={`w-full pl-10 pr-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
+                        errors.password
+                          ? 'border-red-400 bg-red-50 focus:border-red-500'
+                          : 'border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
+                      }`}
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  {formData.password && (
+                    <div className="mt-1">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                            style={{ width: `${(passwordStrength / 4) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-gray-700">
+                          {getPasswordStrengthText()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {errors.password && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.password}</p>}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <FiLock className="w-3 h-3" />
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Re-enter password"
+                      className={`w-full pl-10 pr-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
+                        errors.confirmPassword
+                          ? 'border-red-400 bg-red-50 focus:border-red-500'
+                          : 'border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
+                      }`}
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  {errors.confirmPassword && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.confirmPassword}</p>}
+                </div>
+
+                <label className="flex items-start gap-2 p-2.5 bg-gray-50 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-300 transition-all duration-200">
+                  <input
+                    type="checkbox"
+                    name="agreeToTerms"
+                    className="w-4 h-4 mt-0.5 accent-emerald-600 cursor-pointer flex-shrink-0"
+                    checked={formData.agreeToTerms}
+                    onChange={handleChange}
+                  />
+                  <span className="text-xs text-gray-700 font-medium leading-relaxed">
+                    I agree to the <span className="text-emerald-600 font-bold">Terms of Service</span> and <span className="text-emerald-600 font-bold">Privacy Policy</span>
+                  </span>
+                </label>
+                {errors.agreeToTerms && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.agreeToTerms}</p>}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 text-white font-bold text-sm rounded-xl hover:from-emerald-700 hover:via-green-700 hover:to-emerald-800 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiCheckCircle className="w-4 h-4" />
+                      Create Account
+                    </>
+                  )}
+                </button>
+
+                <p className="text-center text-gray-600 text-xs font-medium">
+                  Already have an account?{' '}
+                  <a href="/login" className="text-emerald-600 font-bold hover:text-emerald-700 transition-colors">
+                    Sign In
+                  </a>
+                </p>
+              </form>
             </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Re-enter password"
-                className={`w-full px-3 py-2.5 rounded-xl border-2 transition-all duration-200 focus:outline-none text-sm ${
-                  errors.confirmPassword
-                    ? 'border-red-400 bg-red-50 focus:border-red-500'
-                    : 'border-gray-200 bg-gray-50/50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200'
-                }`}
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-              {errors.confirmPassword && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.confirmPassword}</p>}
-            </div>
-
-            <label className="flex items-start gap-2 p-2.5 bg-gradient-to-r from-emerald-50 to-cyan-50 border-2 border-emerald-200 rounded-xl cursor-pointer hover:border-emerald-400 transition-all duration-200">
-              <input
-                type="checkbox"
-                name="agreeToTerms"
-                className="w-4 h-4 mt-0.5 accent-emerald-600 cursor-pointer flex-shrink-0"
-                checked={formData.agreeToTerms}
-                onChange={handleChange}
-              />
-              <span className="text-xs text-gray-700 font-medium leading-relaxed">
-                I agree to the <span className="text-emerald-600 font-bold">Terms of Service</span> and <span className="text-emerald-600 font-bold">Privacy Policy</span>
-              </span>
-            </label>
-            {errors.agreeToTerms && <p className="text-red-500 text-xs font-semibold">⚠️ {errors.agreeToTerms}</p>}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 text-white font-bold text-sm rounded-xl hover:from-emerald-700 hover:via-green-700 hover:to-emerald-800 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Creating Account...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                  </svg>
-                  Create Account
-                </>
-              )}
-            </button>
-
-            <p className="text-center text-gray-600 text-xs font-medium">
-              Already have an account?{' '}
-              <a href="/login" className="text-emerald-600 font-bold hover:text-emerald-700 transition-colors">
-                Sign In
-              </a>
-            </p>
-          </form>
+          </div>
         </div>
       </div>
 
       <style jsx>{`
-        @keyframes blob {
+        @keyframes float {
           0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-        }
-        @keyframes shimmer {
-          0%, 100% {
-            transform: translateX(-100%);
+            transform: translateY(0px) rotate(0deg);
           }
           50% {
-            transform: translateX(100%);
+            transform: translateY(-20px) rotate(10deg);
           }
         }
         @keyframes fadeIn {
@@ -396,17 +430,8 @@ const Register = () => {
             transform: translateY(0);
           }
         }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        .animate-shimmer {
-          animation: shimmer 3s infinite;
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;

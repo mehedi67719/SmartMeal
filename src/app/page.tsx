@@ -7,7 +7,7 @@ import Register from "@/component/Register";
 export default function Home() {
   return (
 <div>
-  <Login/>
+  this is home component
 </div>
   );
 }
