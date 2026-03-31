@@ -11,7 +11,8 @@ import {
   LogIn, 
   UserPlus,
   Menu,
-  X
+  X,
+  Calculator
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -21,7 +22,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'About', href: '/about', icon: Info },
-    { name: 'Meal List', href: '/meal-list', icon: Utensils },
+    { name: 'Meal Calculator', href: '/meal-calculator', icon: Calculator },
     { name: 'Contact', href: '/contact', icon: Phone },
   ];
 
