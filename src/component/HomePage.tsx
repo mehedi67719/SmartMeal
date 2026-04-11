@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
   Utensils, 
@@ -31,6 +31,12 @@ import {
 } from 'lucide-react';
 
 const HomePage = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const features = [
     {
       icon: Users,
@@ -150,6 +156,10 @@ const HomePage = () => {
     { icon: BarChart3, title: 'Smart Reports', description: 'Real-time analytics dashboard', color: 'from-teal-500 to-emerald-600' },
     { icon: Sparkles, title: 'AI Powered', description: 'Smart meal recommendations', color: 'from-purple-500 to-pink-500' }
   ];
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-white">

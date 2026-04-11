@@ -12,7 +12,7 @@ const Login = () => {
     });
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({
             ...formData,
@@ -20,7 +20,7 @@ const Login = () => {
         });
     };
 
-    const handleSubmit =async (e) => {
+    const handleSubmit =async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         const result = await signIn('credentials', {
@@ -29,7 +29,11 @@ const Login = () => {
             password: formData.password,
         });
 
-        // console.log(result);
+        if (result?.error) {
+            alert('Invalid email or password');
+        } else {
+            window.location.href = '/';
+        }
 
     };
 

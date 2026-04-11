@@ -13,9 +13,6 @@ export const authOptions = {
                 // password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
-
-                // console.log(credentials)
-
                 const userdata={
                     email:credentials.email,
                     password:credentials.password
@@ -23,15 +20,15 @@ export const authOptions = {
 
                 const user = await loginuser(userdata);
 
-                const logeduser=user?.user;
 
-                console.log(logeduser)
+                console.log(user)
 
-                return ({
-                    email:logeduser.email,
-                    name:logeduser.name,
-                    massName:logeduser.messName
-                });
+
+                if (user?.success && user?.user) {
+                    return user.user;
+                }
+                
+                return null;
             }
         })
     ]

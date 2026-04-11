@@ -127,19 +127,19 @@ export function useMealCalculator() {
   };
 
   const calculateAll = () => {
-    // ১. মাসিক খরচ চেক
+  
     if (monthlyCost <= 0) {
       showAlertMessage('error', 'Please enter monthly cost!');
       return;
     }
 
-    // ২. সদস্য চেক
+
     if (members.length === 0) {
       showAlertMessage('error', 'Please add at least one member!');
       return;
     }
 
-    // ৩. মোট মিল গণনা
+
     const total = members.reduce((sum, member) => sum + member.totalMeals, 0);
     setTotalMeals(total);
 
@@ -148,11 +148,11 @@ export function useMealCalculator() {
       return;
     }
 
-    // ৪. প্রতি মিল খরচ গণনা
+  
     const perMealCost = monthlyCost / total;
     setCostPerMeal(perMealCost);
 
-    // ৫. প্রতিটি সদস্যের খরচ এবং বাকি/জমা গণনা
+  
     const updatedMembers = members.map(member => {
       const memberCost = member.totalMeals * perMealCost;
       const dueAmount = memberCost - member.totalDeposit;
