@@ -6,7 +6,7 @@ import { ArrowRight, Sparkles, Star, ShieldCheck } from 'lucide-react';
 export default function CTASection() {
   return (
     <section className="relative overflow-hidden mb-10 rounded-3xl">
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-teal-500 to-green-600 animate-gradient" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-teal-500 to-green-600 animate-pulse" />
       
       <div className="absolute inset-0 opacity-20">
         <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-white rounded-full blur-3xl" />
@@ -14,7 +14,6 @@ export default function CTASection() {
       </div>
 
       <div className="relative z-10 px-6 py-16 sm:px-10 lg:px-20 text-center text-white">
-        
         <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
           <Sparkles className="w-4 h-4 text-yellow-300" />
           <span className="text-sm font-medium tracking-wide">
@@ -76,22 +75,6 @@ export default function CTASection() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes gradient {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 10s ease infinite;
-        }
-      `}</style>
     </section>
   );
 }
