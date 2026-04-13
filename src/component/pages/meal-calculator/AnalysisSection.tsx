@@ -2,7 +2,16 @@
 
 import React from 'react';
 import { PieChart, TrendingUp } from 'lucide-react';
-import { Member } from '@/component/types/meal-calculator';
+
+interface Member {
+  id: string;
+  name: string;
+  totalMeals: number;
+  totalDeposit: number;
+  cost: number;
+  due: number;
+  status: 'due' | 'paid' | 'extra';
+}
 
 interface AnalysisSectionProps {
   members: Member[];
@@ -56,11 +65,11 @@ export default function AnalysisSection({ members, totalCost, totalMeals }: Anal
           </div>
           <div className="flex justify-between py-3 border-b border-white/20">
             <span className="font-semibold text-lg">Average Meals/Member</span>
-            <span className="font-bold text-2xl">{Math.round(totalMeals / members.length)}</span>
+            <span className="font-bold text-2xl">{members.length > 0 ? Math.round(totalMeals / members.length) : 0}</span>
           </div>
           <div className="flex justify-between py-3">
             <span className="font-semibold text-lg">Average Cost/Member</span>
-            <span className="font-bold text-2xl">৳{Math.round(totalCost / members.length) || 0}</span>
+            <span className="font-bold text-2xl">৳{members.length > 0 ? Math.round(totalCost / members.length) : 0}</span>
           </div>
         </div>
       </div>

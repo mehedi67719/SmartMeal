@@ -12,6 +12,11 @@ interface Member {
   status: 'due' | 'paid' | 'extra';
 }
 
+interface Alert {
+  type: string;
+  message: string;
+}
+
 export function useMealCalculator() {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
@@ -25,7 +30,7 @@ export function useMealCalculator() {
   const [newMemberDeposit, setNewMemberDeposit] = useState<number>(0);
   const [totalMeals, setTotalMeals] = useState(0);
   const [costPerMeal, setCostPerMeal] = useState(0);
-  const [showAlert, setShowAlert] = useState<{ type: string; message: string } | null>(null);
+  const [showAlert, setShowAlert] = useState<Alert | null>(null);
   const [isCalculated, setIsCalculated] = useState(false);
 
   useEffect(() => {
@@ -87,8 +92,8 @@ export function useMealCalculator() {
       totalMeals: newMemberMeals || 0,
       totalDeposit: newMemberDeposit || 0,
       cost: 0,
-      due: newMemberDeposit || 0,
-      status: 'due'
+      due: 0 - (newMemberDeposit || 0),
+      status: newMemberDeposit > 0 ? 'extra' : 'due'
     };
     
     setMembers([...members, newMember]);
@@ -103,7 +108,9 @@ export function useMealCalculator() {
     const member = members.find(m => m.id === id);
     setMembers(members.filter(m => m.id !== id));
     setIsCalculated(false);
-    showAlertMessage('success', `${member?.name} removed successfully!`);
+    if (member) {
+      showAlertMessage('success', `${member.name} removed successfully!`);
+    }
   };
 
   const updateMemberMeals = (id: string, meals: number) => {
@@ -127,18 +134,15 @@ export function useMealCalculator() {
   };
 
   const calculateAll = () => {
-  
     if (monthlyCost <= 0) {
       showAlertMessage('error', 'Please enter monthly cost!');
       return;
     }
 
-
     if (members.length === 0) {
       showAlertMessage('error', 'Please add at least one member!');
       return;
     }
-
 
     const total = members.reduce((sum, member) => sum + member.totalMeals, 0);
     setTotalMeals(total);
@@ -148,11 +152,9 @@ export function useMealCalculator() {
       return;
     }
 
-  
     const perMealCost = monthlyCost / total;
     setCostPerMeal(perMealCost);
 
-  
     const updatedMembers = members.map(member => {
       const memberCost = member.totalMeals * perMealCost;
       const dueAmount = memberCost - member.totalDeposit;

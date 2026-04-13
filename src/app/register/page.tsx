@@ -5,6 +5,12 @@ import { FaHamburger, FaPizzaSlice, FaFish, FaUser, FaEnvelope, FaHome, FaLock, 
 import Swal from 'sweetalert2';
 import { postuser } from '@/server/user/auth';
 
+interface PostUserResponse {
+    success: boolean;
+    insertedId?: string;
+    message?: string;
+}
+
 const SignUpPage: React.FC = () => {
     const [accountType, setAccountType] = useState<'member' | 'controller'>('member');
 
@@ -45,7 +51,7 @@ const SignUpPage: React.FC = () => {
         console.log("Form Data Submitted:", newuser);
 
         try {
-            const result = await postuser(newuser);
+            const result = await postuser(newuser) as PostUserResponse;
 
             if (result?.success) {
                 Swal.fire({
@@ -72,11 +78,11 @@ const SignUpPage: React.FC = () => {
                 });
             }
 
-        } catch (error) {
+        } catch (error: any) {
             Swal.fire({
                 icon: "error",
                 title: "Server Error",
-                text: error.message,
+                text: error?.message || "An unexpected error occurred",
             });
         }
     };

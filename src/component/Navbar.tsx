@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Authbutton from './Buttons/Authbutton';
 import { PiBowlFoodFill } from 'react-icons/pi';
+import { FaMoneyBill } from 'react-icons/fa';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,6 +27,7 @@ const Navbar = () => {
     { name: 'About', href: '/about', icon: Info },
     { name: 'Meal Calculator', href: '/meal-calculator', icon: Calculator },
     { name: 'Meal', href: '/meal', icon: PiBowlFoodFill },
+    { name: 'Cost entry', href: '/cost-entry', icon: FaMoneyBill },
     { name: 'Contact', href: '/contact', icon: Phone },
     
   ];

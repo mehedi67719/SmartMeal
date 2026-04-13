@@ -2,8 +2,17 @@
 
 import React from 'react';
 import { Users, Calculator, Trash2, Minus, Plus } from 'lucide-react';
-import { Member } from '@/component/types/meal-calculator';
 import StatsCards from './StatsCards';
+
+interface Member {
+  id: string;
+  name: string;
+  totalMeals: number;
+  totalDeposit: number;
+  cost: number;
+  due: number;
+  status: 'due' | 'paid' | 'extra';
+}
 
 interface MembersTableProps {
   members: Member[];
@@ -65,7 +74,7 @@ export default function MembersTable({
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-center gap-3">
                     <button
-                      onClick={() => onUpdateMeals(member.id, member.totalMeals - 1)}
+                      onClick={() => onUpdateMeals(member.id, Math.max(0, member.totalMeals - 1))}
                       className="w-9 h-9 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors text-gray-700 font-bold flex items-center justify-center"
                     >
                       <Minus className="w-4 h-4" />
@@ -73,7 +82,7 @@ export default function MembersTable({
                     <input
                       type="number"
                       value={member.totalMeals}
-                      onChange={(e) => onUpdateMeals(member.id, Number(e.target.value))}
+                      onChange={(e) => onUpdateMeals(member.id, Math.max(0, Number(e.target.value)))}
                       className="w-20 px-3 py-2 text-center border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none font-semibold text-base"
                     />
                     <button
@@ -88,7 +97,7 @@ export default function MembersTable({
                   <input
                     type="number"
                     value={member.totalDeposit}
-                    onChange={(e) => onUpdateDeposit(member.id, Number(e.target.value))}
+                    onChange={(e) => onUpdateDeposit(member.id, Math.max(0, Number(e.target.value)))}
                     className="w-32 px-3 py-2 text-center border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none font-medium"
                   />
                 </td>
