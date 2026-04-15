@@ -42,7 +42,6 @@ export const Costentry = async (costdata: CostData): Promise<CostEntryResponse> 
     const result = await costcollection.insertOne({
       ...costdata,
       createdAt: new Date(),
-      updatedAt: new Date(),
     });
     
     return { success: true, data: result };

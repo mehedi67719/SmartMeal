@@ -1,9 +1,10 @@
 "use client";
 
-import { Costentry } from "@/server/CostEntry/cost";
+import { Costentry } from "@/server/Cost/cost";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
-import { FaCalendarAlt, FaTag, FaBoxOpen, FaWeightHanging, FaMoneyBillWave, FaCalculator, FaStickyNote, FaUser, FaPlus, FaTrash, FaShoppingCart, FaSave, FaList, FaWallet } from "react-icons/fa";
+import Swal from "sweetalert2";
+import { FaCalendarAlt, FaTag, FaUser, FaPlus, FaTrash, FaShoppingCart, FaSave, FaList, FaWallet, FaStickyNote, FaCalendar } from "react-icons/fa";
 
 interface Item {
   id: number;
@@ -15,6 +16,7 @@ interface Item {
 
 interface FormData {
   date: string;
+  month: string;
   category: string;
   note: string;
   buyer: string;
@@ -23,13 +25,17 @@ interface FormData {
 
 const Page = () => {
   const { data: session } = useSession();
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const getCurrentMonth = () => {
+    const date = new Date();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return `${monthNames[date.getMonth()]}-${date.getFullYear()}`;
+  };
 
   const [formData, setFormData] = useState<FormData>({
     date: new Date().toISOString().split("T")[0],
+    month: getCurrentMonth(),
     category: "",
     note: "",
     buyer: "",
@@ -45,22 +51,30 @@ const Page = () => {
   });
 
   const categories = [
-    { value: "vegetables", label: "🥦 Vegetables", icon: "🥦" },
-    { value: "fish", label: "🐟 Fish", icon: "🐟" },
-    { value: "meat", label: "🍗 Meat", icon: "🍗" },
-    { value: "dairy-eggs", label: "🥚 Dairy & Eggs", icon: "🥚" },
-    { value: "groceries", label: "🍚 Groceries", icon: "🍚" },
-    { value: "bakery", label: "🍞 Bakery", icon: "🍞" },
-    { value: "spices", label: "🧂 Spices & Condiments", icon: "🧂" },
-    { value: "beverages", label: "🥤 Beverages", icon: "🥤" },
-    { value: "fruits", label: "🍎 Fruits", icon: "🍎" },
-    { value: "household", label: "🧼 Household Items", icon: "🧼" },
-    { value: "cleaning", label: "🧻 Cleaning Supplies", icon: "🧻" },
-    { value: "medicine", label: "💊 Medicine", icon: "💊" },
-    { value: "transport", label: "🚗 Transport", icon: "🚗" },
-    { value: "dining", label: "🍽️ Dining / Outside Food", icon: "🍽️" },
-    { value: "others", label: "🛒 Others", icon: "🛒" },
+    { value: "vegetables", label: "🥦 Vegetables" },
+    { value: "fish", label: "🐟 Fish" },
+    { value: "meat", label: "🍗 Meat" },
+    { value: "dairy-eggs", label: "🥚 Dairy & Eggs" },
+    { value: "groceries", label: "🍚 Groceries" },
+    { value: "bakery", label: "🍞 Bakery" },
+    { value: "spices", label: "🧂 Spices & Condiments" },
+    { value: "beverages", label: "🥤 Beverages" },
+    { value: "fruits", label: "🍎 Fruits" },
+    { value: "household", label: "🧼 Household Items" },
+    { value: "cleaning", label: "🧻 Cleaning Supplies" },
+    { value: "medicine", label: "💊 Medicine" },
+    { value: "transport", label: "🚗 Transport" },
+    { value: "dining", label: "🍽️ Dining / Outside Food" },
+    { value: "others", label: "🛒 Others" },
   ];
+
+  const monthOptions = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const currentYear = new Date().getFullYear();
+  const years = [currentYear - 1, currentYear, currentYear + 1];
 
   const addItem = () => {
     setFormData((prev) => ({
@@ -111,6 +125,13 @@ const Page = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleMonthChange = (monthName: string, year: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      month: `${monthName}-${year}`
+    }));
+  };
+
   const calculateGrandTotal = () => {
     return formData.items.reduce((sum, item) => sum + (parseFloat(item.totalPrice) || 0), 0);
   };
@@ -119,10 +140,12 @@ const Page = () => {
     e.preventDefault();
 
     if (!session?.user?.email) {
-      setAlertMessage("Please login to save entry");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+      Swal.fire({
+        icon: "error",
+        title: "Login Required",
+        text: "Please login to save entry",
+        confirmButtonColor: "#10b981",
+      });
       return;
     }
 
@@ -133,7 +156,9 @@ const Page = () => {
 
       const costdata = {
         date: formData.date,
+        month: formData.month,
         Manageremail: session?.user?.email,
+        ManagerName: session?.user?.name || session?.user?.Name || "Unknown Manager",
         category: formData.category,
         buyer: formData.buyer || "Unknown",
         note: formData.note,
@@ -146,17 +171,21 @@ const Page = () => {
         grandTotal: grandTotal
       };
 
-      console.log(costdata);
-
       const result = await Costentry(costdata);
 
       if (result && result.success) {
-        setAlertMessage("Entry saved successfully!");
-        setAlertType("success");
-        setShowAlert(true);
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Entry saved successfully!",
+          confirmButtonColor: "#10b981",
+          timer: 2000,
+          showConfirmButton: true,
+        });
 
         setFormData({
           date: new Date().toISOString().split("T")[0],
+          month: getCurrentMonth(),
           category: "",
           note: "",
           buyer: "",
@@ -170,53 +199,33 @@ const Page = () => {
             }
           ],
         });
-
-        setTimeout(() => {
-          setShowAlert(false);
-        }, 3000);
       } else {
-        setAlertMessage(result?.error || "Failed to save entry. Please try again.");
-        setAlertType("error");
-        setShowAlert(true);
-
-        setTimeout(() => {
-          setShowAlert(false);
-        }, 3000);
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: result?.error || "Failed to save entry. Please try again.",
+          confirmButtonColor: "#10b981",
+        });
       }
     } catch (error) {
       console.error("Error saving entry:", error);
-      setAlertMessage("An error occurred. Please try again.");
-      setAlertType("error");
-      setShowAlert(true);
-
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 3000);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "An error occurred. Please try again.",
+        confirmButtonColor: "#10b981",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const grandTotal = calculateGrandTotal();
+  const [selectedMonthName, selectedYear] = formData.month.split("-");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
       <div className="max-w-7xl my-10 w-full mx-auto px-4 sm:px-6 lg:px-8">
-        {showAlert && (
-          <div className={`fixed top-20 right-4 z-50 animate-slide-in ${alertType === "success" ? "bg-green-500" : "bg-red-500"} text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2`}>
-            {alertType === "success" ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            )}
-            {alertMessage}
-          </div>
-        )}
-
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <FaShoppingCart className="text-4xl text-green-600" />
@@ -225,6 +234,12 @@ const Page = () => {
             </h2>
           </div>
           <p className="text-gray-500">Manage multiple items in one entry</p>
+          {session?.user?.name && (
+            <div className="mt-2 inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+              <FaUser className="text-xs" />
+              Manager: {session.user.name}
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-6 border border-green-100">
@@ -252,6 +267,37 @@ const Page = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <FaCalendar className="text-green-600 text-xs" />
+                  Month <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={selectedMonthName || "January"}
+                    onChange={(e) => handleMonthChange(e.target.value, parseInt(selectedYear) || currentYear)}
+                    className="flex-1 px-3 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    {monthOptions.map((month) => (
+                      <option key={month} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedYear || currentYear}
+                    onChange={(e) => handleMonthChange(selectedMonthName || "January", parseInt(e.target.value))}
+                    className="w-28 px-3 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <FaTag className="text-green-600 text-xs" />
                   Category <span className="text-red-500">*</span>
                 </label>
@@ -274,19 +320,19 @@ const Page = () => {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <FaUser className="text-green-600 text-xs" />
-                  Buyer
+                  Buyer Name
                 </label>
                 <input
                   type="text"
                   name="buyer"
                   value={formData.buyer}
                   onChange={handleChange}
-                  placeholder="e.g., Mehedi"
+                  placeholder="Who made the purchase?"
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                 />
               </div>
 
-              <div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   <FaStickyNote className="text-green-600 text-xs" />
                   Note
@@ -399,7 +445,7 @@ const Page = () => {
                   <span className="font-semibold text-gray-700">Grand Total:</span>
                 </div>
                 <div className="text-2xl font-bold text-green-600">
-                  Tk{grandTotal.toFixed(2)}
+                  Tk {grandTotal.toFixed(2)}
                 </div>
               </div>
               <div className="text-xs text-gray-500 mt-2 text-right">
