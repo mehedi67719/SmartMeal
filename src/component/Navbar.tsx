@@ -19,6 +19,7 @@ import {
   History,
   UserCircle,
   Users,
+  DollarSign,
 } from 'lucide-react';
 import { PiBowlFoodFill } from 'react-icons/pi';
 import { FaMoneyBill } from 'react-icons/fa';
@@ -57,6 +58,7 @@ const Navbar = () => {
     { name: 'Profile', href: '/profile', icon: UserCircle },
     { name: 'Cost History', href: '/cost-history', icon: History },
     { name: 'All Users', href: '/allusers', icon: Users },
+    { name: 'Member Deposit', href: '/member-deposit', icon: DollarSign },
   ];
 
   const handleLogout = async () => {
