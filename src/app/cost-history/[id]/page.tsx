@@ -31,13 +31,13 @@ const Page = () => {
   const id = params.id as string;
 
   const [data, setData] = useState<CostData | null>(null);
-  const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+     
         const result = await costdetels(id);
         if (result.success && result.data) {
           setData(result.data);
@@ -48,23 +48,14 @@ const Page = () => {
         setError("An error occurred while fetching data");
         console.error(err);
       } finally {
-        setLoading(false);
+      
       }
     };
 
     if (id) fetchData();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600 text-lg">Loading cost details...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   if (error) {
     return (
