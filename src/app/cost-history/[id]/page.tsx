@@ -31,31 +31,30 @@ const Page = () => {
   const id = params.id as string;
 
   const [data, setData] = useState<CostData | null>(null);
-
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-     
         const result = await costdetels(id);
         if (result.success && result.data) {
-          setData(result.data);
+          const formattedData: CostData = {
+            ...result.data,
+            _id: result.data._id.toString(),
+            createdAt: result.data.createdAt?.toString() || new Date().toISOString()
+          };
+          setData(formattedData);
         } else {
           setError(result.message || "Failed to load cost details");
         }
       } catch (err) {
         setError("An error occurred while fetching data");
         console.error(err);
-      } finally {
-      
       }
     };
 
     if (id) fetchData();
   }, [id]);
-
-
 
   if (error) {
     return (
@@ -76,7 +75,10 @@ const Page = () => {
   if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-500">No data found</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -125,7 +127,7 @@ const Page = () => {
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-1">Buyer</h3>
-                <p className="text-gray-900">{data.buyer}</p>
+                <p className="text-gray-900">{data.buyer || "N/A"}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-1">Created At</h3>

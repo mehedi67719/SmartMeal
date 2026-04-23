@@ -158,7 +158,7 @@ const Page = () => {
         date: formData.date,
         month: formData.month,
         Manageremail: session?.user?.email,
-        ManagerName: session?.user?.name || session?.user?.Name || "Unknown Manager",
+        ManagerName: session?.user?.name || "Unknown Manager",
         category: formData.category,
         buyer: formData.buyer || "Unknown",
         note: formData.note,

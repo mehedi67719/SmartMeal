@@ -3,7 +3,7 @@ import { dbconnect } from "@/lib/dbconnect";
 import { ObjectId } from "mongodb";
 
 interface User {
-  _id: ObjectId;
+  _id: string;
   Name: string;
   email: string;
   accountType: string;
@@ -24,8 +24,24 @@ export const alluser = async (): Promise<ApiResponse<User[]>> => {
     const usercollection = await dbconnect("users");
 
     const users = await usercollection.find({}).toArray();
+    
 
-    return users;
+    const serializedUsers: User[] = users.map(user => ({
+      _id: user._id.toString(),
+      Name: user.Name || "",
+      email: user.email || "",
+      accountType: user.accountType || "member",
+      messName: user.messName || "",
+      secretCode: user.secretCode || "",
+      password: user.password || ""
+    }));
+
+    return {
+      status: 200,
+      data: serializedUsers,
+      success: true,
+      message: "Users fetched successfully"
+    };
   } catch (error) {
     console.error("Error fetching users:", error);
 

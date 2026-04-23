@@ -34,8 +34,33 @@ const Page = () => {
 
     const loadDeposits = async () => {
         try {
-            const data = await getDeposits();
-            setDeposits(data);
+            const response: any = await getDeposits();
+            
+            let depositsArray: any[] = [];
+            
+            if (Array.isArray(response)) {
+                depositsArray = response;
+            } else if (response && response.data && Array.isArray(response.data)) {
+                depositsArray = response.data;
+            } else if (response && typeof response === 'object') {
+                depositsArray = [response];
+            } else {
+                depositsArray = [];
+            }
+            
+            const formattedData: DepositData[] = depositsArray.map((item: any) => ({
+                _id: item._id?.toString() || item._id,
+                userId: item.userId || item.user_id || '',
+                userName: item.userName || item.name || item.user_name || '',
+                userEmail: item.userEmail || item.email || item.user_email || '',
+                amount: typeof item.amount === 'number' ? item.amount : parseFloat(item.amount) || 0,
+                date: item.date ? new Date(item.date) : new Date(),
+                messName: item.messName || item.mess_name || '',
+                month: item.month || '',
+                secretCode: item.secretCode || item.secret_code || ''
+            }));
+            
+            setDeposits(formattedData);
         } catch (error) {
             console.error('Error loading deposits:', error);
         } finally {
@@ -177,7 +202,7 @@ const Page = () => {
                                     </tr>
                                 ) : (
                                     getFilteredDeposits().map((deposit, index) => (
-                                        <tr key={index} className="hover:bg-green-50 transition">
+                                        <tr key={deposit._id || index} className="hover:bg-green-50 transition">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">

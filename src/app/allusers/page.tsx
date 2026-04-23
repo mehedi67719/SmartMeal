@@ -19,13 +19,32 @@ interface User {
     password: string;
 }
 
+interface ApiResponse<T> {
+    status: number;
+    data: T;
+    success: boolean;
+    message?: string;
+}
+
 const Page = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState({ delete: '', role: '' });
 
     const loadUsers = useCallback(async () => {
         try {
-            const data = await alluser();
+            const response: any = await alluser();
+            
+            let data: any[] = [];
+            if (Array.isArray(response)) {
+                data = response;
+            } else if (response && response.data && Array.isArray(response.data)) {
+                data = response.data;
+            } else if (response && Array.isArray(response)) {
+                data = response;
+            } else {
+                data = [];
+            }
+            
             const serializedUsers = data.map((user: any) => ({
                 _id: user._id.toString(),
                 Name: user.Name,
@@ -280,7 +299,7 @@ const Page = () => {
 
                     <div className="bg-green-50 px-6 py-3 border-t border-green-200">
                         <p className="text-sm text-green-700">
-                            Showing <span className="font-semibold">{users.length}</span> users
+                            Showing <span className="font-sembold">{users.length}</span> users
                         </p>
                     </div>
                 </div>

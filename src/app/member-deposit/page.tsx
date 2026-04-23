@@ -37,8 +37,18 @@ const Page = () => {
 
     const loadUsers = async () => {
         try {
-            const data = await alluser();
-            const serializedUsers = data.map((user: any) => ({
+            const response: any = await alluser();
+            
+            let usersArray: any[] = [];
+            if (Array.isArray(response)) {
+                usersArray = response;
+            } else if (response && response.data && Array.isArray(response.data)) {
+                usersArray = response.data;
+            } else {
+                usersArray = [];
+            }
+            
+            const serializedUsers: User[] = usersArray.map((user: any) => ({
                 _id: user._id.toString(),
                 Name: user.Name,
                 email: user.email,
@@ -58,7 +68,7 @@ const Page = () => {
             const totals: { [key: string]: number } = {};
             for (const user of usersList) {
                 const total = await getTotalUserDeposit(user._id);
-                totals[user._id] = total;
+                totals[user._id] = typeof total === 'number' ? total : 0;
             }
             setUserTotals(totals);
         } catch (error) {
@@ -105,7 +115,7 @@ const Page = () => {
             try {
                 const depositResult = await deposit(amount, user, selectedMonth, user.secretCode);
                 
-                if (depositResult.success) {
+                if (depositResult && depositResult.success) {
                     await loadUserTotals(users);
                     setDepositAmounts(prev => ({ ...prev, [user._id]: 0 }));
                     
@@ -119,7 +129,7 @@ const Page = () => {
                 } else {
                     await Swal.fire({
                         title: 'Error!',
-                        text: depositResult.error || 'Failed to save deposit',
+                        text: depositResult?.error || 'Failed to save deposit',
                         icon: 'error',
                         confirmButtonColor: '#22c55e'
                     });
