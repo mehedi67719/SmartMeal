@@ -18,12 +18,21 @@ interface DepositData {
     secretCode: string;
 }
 
+interface CustomSessionUser {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    secretCode?: string;
+    accountType?: string;
+    messName?: string;
+}
+
 const Page = () => {
     const [deposits, setDeposits] = useState<DepositData[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterMonth, setFilterMonth] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [isSessionReady, setIsSessionReady] = useState(false);
     const { data: session, status } = useSession();
 
     const months = [
@@ -32,17 +41,16 @@ const Page = () => {
     ];
 
     useEffect(() => {
-        if (status === 'authenticated' && session?.user?.secretCode) {
-            setIsSessionReady(true);
+        if (status === 'authenticated') {
             loadDeposits();
         } else if (status === 'unauthenticated') {
-            setIsSessionReady(true);
             setLoading(false);
         }
     }, [status, session]);
 
     const loadDeposits = async () => {
-        const currentSecretCode = session?.user?.secretCode;
+        const user = session?.user as CustomSessionUser;
+        const currentSecretCode = user?.secretCode;
         
         if (!currentSecretCode) {
             console.error('No secret code found');
@@ -113,7 +121,7 @@ const Page = () => {
         return filtered;
     };
 
-    if (status === 'loading' || !isSessionReady) {
+    if (status === 'loading') {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">

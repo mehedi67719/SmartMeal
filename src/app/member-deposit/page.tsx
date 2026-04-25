@@ -18,6 +18,16 @@ interface User {
     secretCode: string;
 }
 
+interface CustomSessionUser {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    secretCode?: string;
+    accountType?: string;
+    messName?: string;
+}
+
 const Page = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
@@ -38,7 +48,7 @@ const Page = () => {
     }, []);
 
     useEffect(() => {
-        if (status === 'authenticated' && session?.user?.secretCode) {
+        if (status === 'authenticated') {
             setIsSessionReady(true);
             loadUsers();
         } else if (status === 'unauthenticated') {
@@ -75,7 +85,8 @@ const Page = () => {
     };
 
     const loadUserTotals = async (usersList: User[]) => {
-        const currentSecretCode = session?.user?.secretCode;
+        const user = session?.user as CustomSessionUser;
+        const currentSecretCode = user?.secretCode;
         
         if (!currentSecretCode) {
             console.error('No secret code found');
@@ -96,7 +107,8 @@ const Page = () => {
 
     const saveDeposit = async (user: User) => {
         const amount = depositAmounts[user._id];
-        const currentSecretCode = session?.user?.secretCode;
+        const currentUser = session?.user as CustomSessionUser;
+        const currentSecretCode = currentUser?.secretCode;
         
         if (!currentSecretCode) {
             await Swal.fire({
