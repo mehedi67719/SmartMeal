@@ -90,6 +90,7 @@ export const loginuser = async (payload: LoginPayload) => {
       email: user.email,
       messName:user.messName,
       accountType: user.accountType,
+      secretCode:user.secretCode,
     },
   };
 };

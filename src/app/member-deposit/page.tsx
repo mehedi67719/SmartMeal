@@ -7,6 +7,7 @@ import { FiUser, FiMail, FiDollarSign, FiSave } from 'react-icons/fi';
 import { FaCrown, FaStar, FaUser } from 'react-icons/fa';
 import { deposit, getTotalUserDeposit } from '@/server/deposite/deposite';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 interface User {
     _id: string;
@@ -23,6 +24,8 @@ const Page = () => {
     const [depositAmounts, setDepositAmounts] = useState<{ [key: string]: number }>({});
     const [userTotals, setUserTotals] = useState<{ [key: string]: number }>({});
     const [selectedMonth, setSelectedMonth] = useState('');
+    const [isSessionReady, setIsSessionReady] = useState(false);
+    const { data: session, status } = useSession();
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -32,8 +35,16 @@ const Page = () => {
     useEffect(() => {
         const currentMonth = months[new Date().getMonth()];
         setSelectedMonth(currentMonth);
-        loadUsers();
     }, []);
+
+    useEffect(() => {
+        if (status === 'authenticated' && session?.user?.secretCode) {
+            setIsSessionReady(true);
+            loadUsers();
+        } else if (status === 'unauthenticated') {
+            setIsSessionReady(true);
+        }
+    }, [status, session]);
 
     const loadUsers = async () => {
         try {
@@ -64,10 +75,17 @@ const Page = () => {
     };
 
     const loadUserTotals = async (usersList: User[]) => {
+        const currentSecretCode = session?.user?.secretCode;
+        
+        if (!currentSecretCode) {
+            console.error('No secret code found');
+            return;
+        }
+        
         try {
             const totals: { [key: string]: number } = {};
             for (const user of usersList) {
-                const total = await getTotalUserDeposit(user._id);
+                const total = await getTotalUserDeposit(user._id, currentSecretCode);
                 totals[user._id] = typeof total === 'number' ? total : 0;
             }
             setUserTotals(totals);
@@ -78,6 +96,17 @@ const Page = () => {
 
     const saveDeposit = async (user: User) => {
         const amount = depositAmounts[user._id];
+        const currentSecretCode = session?.user?.secretCode;
+        
+        if (!currentSecretCode) {
+            await Swal.fire({
+                title: 'Error!',
+                text: 'You are not logged in',
+                icon: 'error',
+                confirmButtonColor: '#22c55e'
+            });
+            return;
+        }
         
         if (!amount || amount <= 0) {
             await Swal.fire({
@@ -113,7 +142,7 @@ const Page = () => {
         if (result.isConfirmed) {
             setLoading(true);
             try {
-                const depositResult = await deposit(amount, user, selectedMonth, user.secretCode);
+                const depositResult = await deposit(amount, user, selectedMonth, currentSecretCode);
                 
                 if (depositResult && depositResult.success) {
                     await loadUserTotals(users);
@@ -166,6 +195,27 @@ const Page = () => {
             default: return 'bg-green-100 text-green-800';
         }
     };
+
+    if (status === 'loading' || !isSessionReady) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-600">Please login to access this page</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">

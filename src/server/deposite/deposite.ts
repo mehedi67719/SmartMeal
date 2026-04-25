@@ -59,10 +59,10 @@ export const deposit = async (amount: number, user: any, month: string, secretCo
     }
 };
 
-export const getDeposits = async () => {
+export const getDeposits = async (secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
-        const deposits = await depositCollection.find({}).sort({ date: -1 }).toArray();
+        const deposits = await depositCollection.find({ secretCode: secretCode }).sort({ date: -1 }).toArray();
         return deposits;
     } catch (error) {
         console.error("Error fetching deposits:", error);
@@ -70,10 +70,10 @@ export const getDeposits = async () => {
     }
 };
 
-export const getDepositsByMonth = async (month: string) => {
+export const getDepositsByMonth = async (month: string, secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
-        const deposits = await depositCollection.find({ month: month }).sort({ date: -1 }).toArray();
+        const deposits = await depositCollection.find({ month: month, secretCode: secretCode }).sort({ date: -1 }).toArray();
         return deposits;
     } catch (error) {
         console.error("Error fetching deposits by month:", error);
@@ -81,12 +81,13 @@ export const getDepositsByMonth = async (month: string) => {
     }
 };
 
-export const getUserDepositsByMonth = async (userId: string, month: string) => {
+export const getUserDepositsByMonth = async (userId: string, month: string, secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
         const deposits = await depositCollection.find({ 
             userId: userId, 
-            month: month 
+            month: month,
+            secretCode: secretCode
         }).sort({ date: -1 }).toArray();
         return deposits;
     } catch (error) {
@@ -95,11 +96,11 @@ export const getUserDepositsByMonth = async (userId: string, month: string) => {
     }
 };
 
-export const getTotalUserDeposit = async (userId: string) => {
+export const getTotalUserDeposit = async (userId: string, secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
         const result = await depositCollection.aggregate([
-            { $match: { userId: userId } },
+            { $match: { userId: userId, secretCode: secretCode } },
             { $group: { _id: null, total: { $sum: "$amount" } } }
         ]).toArray();
         
@@ -110,11 +111,11 @@ export const getTotalUserDeposit = async (userId: string) => {
     }
 };
 
-export const getTotalUserDepositByMonth = async (userId: string, month: string) => {
+export const getTotalUserDepositByMonth = async (userId: string, month: string, secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
         const result = await depositCollection.aggregate([
-            { $match: { userId: userId, month: month } },
+            { $match: { userId: userId, month: month, secretCode: secretCode } },
             { $group: { _id: null, total: { $sum: "$amount" } } }
         ]).toArray();
         
@@ -129,18 +130,14 @@ export const updateDeposit = async (depositId: string, amount: number, secretCod
     try {
         const depositCollection = await dbconnect("deposite");
         
-        const deposit = await depositCollection.findOne({ _id: new ObjectId(depositId) });
+        const deposit = await depositCollection.findOne({ _id: new ObjectId(depositId), secretCode: secretCode });
         
         if (!deposit) {
             return { success: false, error: "Deposit not found" };
         }
         
-        if (secretCode !== deposit.secretCode) {
-            return { success: false, error: "Invalid secret code" };
-        }
-        
         const result = await depositCollection.updateOne(
-            { _id: new ObjectId(depositId) },
+            { _id: new ObjectId(depositId), secretCode: secretCode },
             { $set: { amount: amount, date: new Date() } }
         );
         
@@ -155,17 +152,13 @@ export const deleteDeposit = async (depositId: string, secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
         
-        const deposit = await depositCollection.findOne({ _id: new ObjectId(depositId) });
+        const deposit = await depositCollection.findOne({ _id: new ObjectId(depositId), secretCode: secretCode });
         
         if (!deposit) {
             return { success: false, error: "Deposit not found" };
         }
         
-        if (secretCode !== deposit.secretCode) {
-            return { success: false, error: "Invalid secret code" };
-        }
-        
-        const result = await depositCollection.deleteOne({ _id: new ObjectId(depositId) });
+        const result = await depositCollection.deleteOne({ _id: new ObjectId(depositId), secretCode: secretCode });
         
         return { success: true, data: result };
     } catch (error) {
@@ -174,11 +167,11 @@ export const deleteDeposit = async (depositId: string, secretCode: string) => {
     }
 };
 
-export const getTotalDepositsByMonth = async (month: string) => {
+export const getTotalDepositsByMonth = async (month: string, secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
         const result = await depositCollection.aggregate([
-            { $match: { month: month } },
+            { $match: { month: month, secretCode: secretCode } },
             { $group: { _id: null, total: { $sum: "$amount" } } }
         ]).toArray();
         
@@ -189,10 +182,10 @@ export const getTotalDepositsByMonth = async (month: string) => {
     }
 };
 
-export const getAllUserDeposits = async (userId: string) => {
+export const getAllUserDeposits = async (userId: string, secretCode: string) => {
     try {
         const depositCollection = await dbconnect("deposite");
-        const deposits = await depositCollection.find({ userId: userId }).sort({ date: -1 }).toArray();
+        const deposits = await depositCollection.find({ userId: userId, secretCode: secretCode }).sort({ date: -1 }).toArray();
         return deposits;
     } catch (error) {
         console.error("Error fetching user deposits:", error);

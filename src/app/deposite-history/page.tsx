@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { getDeposits } from '@/server/deposite/deposite';
 import { FiDollarSign, FiCalendar, FiUser, FiMail } from 'react-icons/fi';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 interface DepositData {
     _id?: string;
@@ -22,6 +23,8 @@ const Page = () => {
     const [loading, setLoading] = useState(true);
     const [filterMonth, setFilterMonth] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [isSessionReady, setIsSessionReady] = useState(false);
+    const { data: session, status } = useSession();
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -29,12 +32,26 @@ const Page = () => {
     ];
 
     useEffect(() => {
-        loadDeposits();
-    }, []);
+        if (status === 'authenticated' && session?.user?.secretCode) {
+            setIsSessionReady(true);
+            loadDeposits();
+        } else if (status === 'unauthenticated') {
+            setIsSessionReady(true);
+            setLoading(false);
+        }
+    }, [status, session]);
 
     const loadDeposits = async () => {
+        const currentSecretCode = session?.user?.secretCode;
+        
+        if (!currentSecretCode) {
+            console.error('No secret code found');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const response: any = await getDeposits();
+            const response: any = await getDeposits(currentSecretCode);
             
             let depositsArray: any[] = [];
             
@@ -95,6 +112,27 @@ const Page = () => {
         }
         return filtered;
     };
+
+    if (status === 'loading' || !isSessionReady) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="mt-4 text-green-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (status === 'unauthenticated') {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-600">Please login to view deposit history</p>
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
