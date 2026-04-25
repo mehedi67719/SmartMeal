@@ -2,6 +2,8 @@
 
 import { dbconnect } from "@/lib/dbconnect";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/Authoptions";
 
 type MonthResponse = {
   status: number;
@@ -36,6 +38,7 @@ type CostData = {
   items: CostItem[];
   grandTotal: number;
   createdAt: string;
+  secretCode: string;
 };
 
 type CostHistoryResponse = {
@@ -52,10 +55,30 @@ type FilterType = {
 
 export const allmonth = async (): Promise<MonthResponse> => {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return {
+        status: 401,
+        success: false,
+        message: "Unauthorized",
+      };
+    }
+
+    const userSecretCode = (session.user as any)?.secretCode;
+    
+    if (!userSecretCode) {
+      return {
+        status: 401,
+        success: false,
+        message: "Secret code not found",
+      };
+    }
+
     const costcollection = await dbconnect("cost");
 
     const result = await costcollection
-      .find<{ month: string }>({}, { projection: { month: 1, _id: 0 } })
+      .find<{ month: string }>({ secretCode: userSecretCode }, { projection: { month: 1, _id: 0 } })
       .toArray();
 
     const month = [...new Set(result.map((item) => item.month))];
@@ -76,10 +99,30 @@ export const allmonth = async (): Promise<MonthResponse> => {
 
 export const allmanager = async (): Promise<ManagerResponse> => {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return {
+        status: 401,
+        success: false,
+        message: "Unauthorized",
+      };
+    }
+
+    const userSecretCode = (session.user as any)?.secretCode;
+    
+    if (!userSecretCode) {
+      return {
+        status: 401,
+        success: false,
+        message: "Secret code not found",
+      };
+    }
+
     const costcollection = await dbconnect("cost");
 
     const result = await costcollection
-      .find<{ ManagerName: string }>({}, { projection: { ManagerName: 1, _id: 0 } })
+      .find<{ ManagerName: string }>({ secretCode: userSecretCode }, { projection: { ManagerName: 1, _id: 0 } })
       .toArray();
 
     const allmanager = [...new Set(result.map((item) => item.ManagerName))];
@@ -102,11 +145,31 @@ export const costhistory = async (
   filter: FilterType
 ): Promise<CostHistoryResponse> => {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return {
+        status: 401,
+        success: false,
+        message: "Unauthorized",
+      };
+    }
+
+    const userSecretCode = (session.user as any)?.secretCode;
+    
+    if (!userSecretCode) {
+      return {
+        status: 401,
+        success: false,
+        message: "Secret code not found",
+      };
+    }
+
     const { month, manager } = filter;
 
     const costcollection = await dbconnect("cost");
 
-    const query: Partial<Pick<CostData, "month" | "ManagerName">> = {};
+    const query: any = { secretCode: userSecretCode };
 
     if (month && month !== "all") {
       query.month = month;

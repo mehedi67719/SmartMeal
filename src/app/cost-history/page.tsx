@@ -1,174 +1,330 @@
 "use client";
-import { allmanager, allmonth, costhistory } from '@/server/Cost/Costhistory';
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { FiSearch, FiCalendar, FiUser, FiDollarSign, FiEye } from "react-icons/fi";
+import { allmanager, allmonth, costhistory } from "@/server/Cost/Costhistory";
+
+type CostItem = {
+  itemName: string;
+  quantity: string;
+  unitPrice: string;
+  totalPrice: string;
+};
+
+type CostData = {
+  _id: string;
+  date: string;
+  month: string;
+  Manageremail: string;
+  ManagerName: string;
+  category: string;
+  buyer: string;
+  note: string;
+  items: CostItem[];
+  grandTotal: number;
+  createdAt: string;
+};
+
+interface CustomSessionUser {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  secretCode?: string;
+  accountType?: string;
+  messName?: string;
+}
 
 const Page = () => {
-  const [month, setmonth] = useState("all");
-  const [manager, setmanager] = useState("all");
-  const [monthOptions, setMonthOptions] = useState<string[]>([]);
-  const [managerOptions, setManagerOptions] = useState<string[]>([]);
-  const [costData, setCostData] = useState<any[]>([]);
+  const { data: session, status } = useSession();
+  const [data, setData] = useState<CostData[]>([]);
+  const [filteredData, setFilteredData] = useState<CostData[]>([]);
+  const [months, setMonths] = useState<string[]>([]);
+  const [managers, setManagers] = useState<string[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedManager, setSelectedManager] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
-    const fetchMonthData = async () => {
-      try {
-        const response = await allmonth();
-        if (response.success && response.data) {
-          setMonthOptions(response.data);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchMonthData();
-  }, []);
+    if (status === 'authenticated') {
+      setIsSessionReady(true);
+    } else if (status === 'unauthenticated') {
+      setLoading(false);
+      setIsSessionReady(true);
+    }
+  }, [status]);
 
   useEffect(() => {
-    const fetchManagerData = async () => {
-      try {
-        const response = await allmanager();
-        if (response.success && response.allmanager) {
-          setManagerOptions(response.allmanager);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchManagerData();
-  }, []);
+    if (session?.user && isSessionReady) {
+      fetchFilters();
+      fetchData();
+    }
+  }, [session, isSessionReady]);
 
-  useEffect(() => {
-    const fetchCostHistory = async () => {
-      try {
-        const filter = { month: month, manager: manager };
-        const response = await costhistory(filter);
-        if (response.success && response.data) {
-          setCostData(response.data);
-        }
-      } catch (err) {
-        console.log(err);
+  const fetchFilters = async () => {
+    try {
+      const monthResult = await allmonth();
+      if (monthResult.success && monthResult.data) {
+        setMonths(monthResult.data);
       }
-    };
-    fetchCostHistory();
-  }, [month, manager]);
 
-  const handlemonthchange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setmonth(e.target.value);
+      const managerResult = await allmanager();
+      if (managerResult.success && managerResult.allmanager) {
+        setManagers(managerResult.allmanager);
+      }
+    } catch (error) {
+      console.error("Error fetching filters:", error);
+    }
   };
 
-  const handlemanagerchange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setmanager(e.target.value);
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const filter: any = {};
+      if (selectedMonth && selectedMonth !== "all") {
+        filter.month = selectedMonth;
+      }
+      if (selectedManager && selectedManager !== "all") {
+        filter.manager = selectedManager;
+      }
+
+      const result = await costhistory(filter);
+      if (result.success && result.data) {
+        const formattedData: CostData[] = result.data.map((item: any) => ({
+          ...item,
+          _id: item._id.toString(),
+          createdAt: item.createdAt?.toString() || new Date().toISOString()
+        }));
+        setData(formattedData);
+        setFilteredData(formattedData);
+      }
+    } catch (error) {
+      console.error("Error fetching cost history:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    let filtered = [...data];
+    
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.ManagerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.buyer.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    setFilteredData(filtered);
+  }, [searchTerm, data]);
+
+  const handleFilterChange = () => {
+    fetchData();
+  };
+
+  const getTotalAmount = () => {
+    return filteredData.reduce((sum, item) => sum + item.grandTotal, 0);
+  };
+
+  if (status === 'loading' || !isSessionReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">⚠️</div>
+          <p className="text-red-600 text-lg">Please login to view cost history</p>
+          <Link href="/login">
+            <button className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700 transition-colors">
+              Go to Login
+            </button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="py-10 px-3">
-      <div className="container mx-auto px-4 max-w-full lg:max-w-7xl">
-        <h1 className="text-center text-3xl lg:text-4xl font-semibold mb-8" style={{ color: '#2e7d32' }}>
-          📊 Cost History
-        </h1>
-
-        <div className="flex gap-5 justify-center flex-wrap mb-10">
-          <select 
-            value={month} 
-            onChange={handlemonthchange}
-            className="px-6 py-3 text-base rounded-lg border-2 border-green-500 bg-white font-medium cursor-pointer outline-none transition-all duration-300"
-            style={{ color: '#2e7d32' }}
-          >
-            <option value="all">📅 All Months</option>
-            {monthOptions.map((monthItem, index) => (
-              <option key={index} value={monthItem}>
-                {monthItem}
-              </option>
-            ))}
-          </select>
-
-          <select 
-            value={manager} 
-            onChange={handlemanagerchange}
-            className="px-6 py-3 text-base rounded-lg border-2 border-green-500 bg-white font-medium cursor-pointer outline-none transition-all duration-300"
-            style={{ color: '#2e7d32' }}
-          >
-            <option value="all">👨‍💼 All Managers</option>
-            {managerOptions.map((managerItem, index) => (
-              <option key={index} value={managerItem}>
-                {managerItem}
-              </option>
-            ))}
-          </select>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-green-800">Cost History</h1>
+          <p className="text-green-600 mt-1">View and manage all cost entries</p>
         </div>
 
-        <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200">
-          <div className="overflow-x-auto lg:overflow-x-visible">
-            <table className="w-full text-sm min-w-[800px] lg:min-w-full">
-              <thead>
-                <tr className="text-white font-semibold" style={{ backgroundColor: '#2e7d32' }}>
-                  <th className="p-4 text-left whitespace-nowrap">Date</th>
-                  <th className="p-4 text-left whitespace-nowrap">Month</th>
-                  <th className="p-4 text-left whitespace-nowrap">Manager</th>
-                  <th className="p-4 text-left whitespace-nowrap">Category</th>
-                  <th className="p-4 text-left whitespace-nowrap">Buyer</th>
-                  <th className="p-4 text-left whitespace-nowrap">Items</th>
-                  <th className="p-4 text-right whitespace-nowrap">Grand Total</th>
-                  <th className="p-4 text-center whitespace-nowrap">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {costData.map((cost, index) => (
-                  <tr 
-                    key={index}
-                    className={`border-b border-gray-200 transition-colors duration-300 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-green-50'
-                    } hover:bg-green-100`}
-                  >
-                    <td className="p-3 px-4 text-gray-700 whitespace-nowrap">{cost.date}</td>
-                    <td className="p-3 px-4 text-gray-700 whitespace-nowrap">
-                      <span className="bg-green-50 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap" style={{ color: '#2e7d32' }}>
-                        {cost.month}
-                      </span>
-                    </td>
-                    <td className="p-3 px-4 text-gray-700 whitespace-nowrap">
-                      <span className="font-medium whitespace-nowrap" style={{ color: '#2e7d32' }}>
-                        {cost.ManagerName}
-                      </span>
-                    </td>
-                    <td className="p-3 px-4 text-gray-700 whitespace-nowrap">
-                      <span className="bg-orange-50 px-2 py-1 rounded-md text-xs whitespace-nowrap">
-                        {cost.category}
-                      </span>
-                    </td>
-                    <td className="p-3 px-4 text-gray-700 whitespace-nowrap">{cost.buyer}</td>
-                    <td className="p-3 px-4 text-gray-700 whitespace-nowrap">
-                      {cost.items?.length || 0} items
-                    </td>
-                    <td className="p-3 px-4 text-right font-bold whitespace-nowrap" style={{ color: '#2e7d32', fontSize: '16px' }}>
-                      ৳{cost.grandTotal?.toLocaleString()}
-                    </td>
-                    <td className="p-3 px-4 text-center whitespace-nowrap">
-                      <Link href={`/cost-history/${cost._id}`}>
-                        <button 
-                          className="bg-green-500 text-white border-none px-3 py-1.5 rounded-md cursor-pointer text-xs font-medium transition-colors duration-300 hover:bg-green-700 whitespace-nowrap"
-                        >
-                          View Details
-                        </button>
-                      </Link>
-                    </td>
-                  </tr>
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <FiCalendar className="text-green-600" />
+                Filter by Month
+              </label>
+              <select
+                value={selectedMonth}
+                onChange={(e) => {
+                  setSelectedMonth(e.target.value);
+                  setTimeout(handleFilterChange, 0);
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="">All Months</option>
+                {months.map((month) => (
+                  <option key={month} value={month}>
+                    {month}
+                  </option>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {costData.length === 0 && (
-            <div className="text-center py-16 text-gray-400 text-lg">
-              No cost history found
+              </select>
             </div>
-          )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <FiUser className="text-green-600" />
+                Filter by Manager
+              </label>
+              <select
+                value={selectedManager}
+                onChange={(e) => {
+                  setSelectedManager(e.target.value);
+                  setTimeout(handleFilterChange, 0);
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="">All Managers</option>
+                {managers.map((manager) => (
+                  <option key={manager} value={manager}>
+                    {manager}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <FiSearch className="text-green-600" />
+                Search
+              </label>
+              <input
+                type="text"
+                placeholder="Search by manager, category, buyer..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="mt-5 text-center font-medium" style={{ color: '#2e7d32' }}>
-          Total Records: {costData.length}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">Total Entries</p>
+                <p className="text-2xl font-bold">{filteredData.length}</p>
+              </div>
+              <FiDollarSign className="text-3xl opacity-80" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">Total Amount</p>
+                <p className="text-2xl font-bold">৳{getTotalAmount().toLocaleString()}</p>
+              </div>
+              <FiDollarSign className="text-3xl opacity-80" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">Unique Managers</p>
+                <p className="text-2xl font-bold">{new Set(data.map(d => d.ManagerName)).size}</p>
+              </div>
+              <FiUser className="text-3xl opacity-80" />
+            </div>
+          </div>
         </div>
+
+        {loading ? (
+          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+            <p className="text-gray-500">Loading cost history...</p>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+            <p className="text-gray-500 text-lg">No cost entries found</p>
+            <Link href="/cost-entry">
+              <button className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                Add New Entry
+              </button>
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-green-700 text-white">
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Date</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Month</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Manager</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Category</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold">Buyer</th>
+                    <th className="px-6 py-3 text-right text-sm font-semibold">Total</th>
+                    <th className="px-6 py-3 text-center text-sm font-semibold">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredData.map((item) => (
+                    <tr key={item._id} className="hover:bg-green-50 transition-colors">
+                      <td className="px-6 py-4 text-gray-700">{item.date}</td>
+                      <td className="px-6 py-4">
+                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded-md text-xs font-medium">
+                          {item.month}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-gray-800">{item.ManagerName}</p>
+                          <p className="text-xs text-gray-500">{item.Manageremail}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-md text-xs">
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">{item.buyer || "N/A"}</td>
+                      <td className="px-6 py-4 text-right font-bold text-green-700">
+                        ৳{item.grandTotal.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <Link href={`/cost-history/${item._id}`}>
+                          <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm flex items-center gap-1 mx-auto">
+                            <FiEye />
+                            View
+                          </button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

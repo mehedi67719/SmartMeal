@@ -22,7 +22,7 @@ export const authOptions = {
                 if (user?.success && user?.user) {
                     return {
                         id: user.user._id,
-                        name: user.user.Name,
+                        name: user.user.name,
                         email: user.user.email,
                         messName: user.user.messName,
                         accountType: user.user.accountType,

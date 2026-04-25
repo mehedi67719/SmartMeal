@@ -23,9 +23,23 @@ interface FormData {
   items: Item[];
 }
 
+interface CustomSessionUser {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  secretCode?: string;
+  accountType?: string;
+  messName?: string;
+}
+
 const Page = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [loading, setLoading] = useState(false);
+  const [isSessionReady, setIsSessionReady] = useState(false);
+
+
+  console.log(session)
 
   const getCurrentMonth = () => {
     const date = new Date();
@@ -75,6 +89,12 @@ const Page = () => {
 
   const currentYear = new Date().getFullYear();
   const years = [currentYear - 1, currentYear, currentYear + 1];
+
+  React.useEffect(() => {
+    if (status === 'authenticated') {
+      setIsSessionReady(true);
+    }
+  }, [status]);
 
   const addItem = () => {
     setFormData((prev) => ({
@@ -139,11 +159,25 @@ const Page = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!session?.user?.email) {
+    const currentUser = session?.user as CustomSessionUser;
+
+    
+    
+    if (!currentUser?.email) {
       Swal.fire({
         icon: "error",
         title: "Login Required",
         text: "Please login to save entry",
+        confirmButtonColor: "#10b981",
+      });
+      return;
+    }
+
+    if (!currentUser?.secretCode) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Secret code not found. Please re-login.",
         confirmButtonColor: "#10b981",
       });
       return;
@@ -157,8 +191,8 @@ const Page = () => {
       const costdata = {
         date: formData.date,
         month: formData.month,
-        Manageremail: session?.user?.email,
-        ManagerName: session?.user?.name || "Unknown Manager",
+        Manageremail: currentUser.email,
+        ManagerName: currentUser.name || currentUser.email?.split('@')[0] || "Manager",
         category: formData.category,
         buyer: formData.buyer || "Unknown",
         note: formData.note,
@@ -168,7 +202,8 @@ const Page = () => {
           unitPrice: item.unitPrice,
           totalPrice: item.totalPrice
         })),
-        grandTotal: grandTotal
+        grandTotal: grandTotal,
+        secretCode: currentUser.secretCode
       };
 
       const result = await Costentry(costdata);
@@ -222,6 +257,27 @@ const Page = () => {
 
   const grandTotal = calculateGrandTotal();
   const [selectedMonthName, selectedYear] = formData.month.split("-");
+
+  if (status === 'loading' || !isSessionReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Please login to access this page</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
