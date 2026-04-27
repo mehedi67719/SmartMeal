@@ -2,6 +2,7 @@
 
 import { dbconnect } from "@/lib/dbconnect";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/Authoptions";
 
 interface MealItem {
   date: number;
@@ -15,18 +16,28 @@ interface MealData {
   month: string;
   year: number;
   meals: MealItem[];
+  secretCode: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export const uploadmeal = async (meal: MealItem[], month: string, year: number) => {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
     if (!session || !session.user?.email) {
       return {
         success: false,
         message: "User not authenticated"
+      };
+    }
+    
+    const userSecretCode = (session.user as any)?.secretCode;
+    
+    if (!userSecretCode) {
+      return {
+        success: false,
+        message: "Secret code not found"
       };
     }
     
@@ -36,7 +47,8 @@ export const uploadmeal = async (meal: MealItem[], month: string, year: number) 
     const existingMeal = await mealcollection.findOne({
       email: useremail,
       month: month,
-      year: year
+      year: year,
+      secretCode: userSecretCode
     });
     
     if (existingMeal) {
@@ -44,7 +56,8 @@ export const uploadmeal = async (meal: MealItem[], month: string, year: number) 
         {
           email: useremail,
           month: month,
-          year: year
+          year: year,
+          secretCode: userSecretCode
         },
         {
           $set: {
@@ -64,6 +77,7 @@ export const uploadmeal = async (meal: MealItem[], month: string, year: number) 
         month: month,
         year: year,
         meals: meal,
+        secretCode: userSecretCode,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -86,12 +100,22 @@ export const uploadmeal = async (meal: MealItem[], month: string, year: number) 
 
 export const getMealByMonth = async (month: string, year: number) => {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
     if (!session || !session.user?.email) {
       return {
         success: false,
         message: "User not authenticated",
+        data: null
+      };
+    }
+    
+    const userSecretCode = (session.user as any)?.secretCode;
+    
+    if (!userSecretCode) {
+      return {
+        success: false,
+        message: "Secret code not found",
         data: null
       };
     }
@@ -102,7 +126,8 @@ export const getMealByMonth = async (month: string, year: number) => {
     const mealData = await mealcollection.findOne({
       email: useremail,
       month: month,
-      year: year
+      year: year,
+      secretCode: userSecretCode
     });
     
     let plainData = null;
