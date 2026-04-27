@@ -44,6 +44,14 @@ interface DashboardData {
   };
 }
 
+interface DailyReportType {
+  day: number;
+  breakfast: number;
+  lunch: number;
+  dinner: number;
+  total: number;
+}
+
 export const managerdashboarddata = async (
   month: string,
   year: number
@@ -109,7 +117,7 @@ export const managerdashboarddata = async (
     const today = new Date().getDate();
     const daysUntilToday = Math.min(today, daysInMonth);
 
-    const dailyReport: { [key: number]: any } = {};
+    const dailyReport: { [key: number]: DailyReportType } = {};
 
     for (let i = 1; i <= daysInMonth; i++) {
       dailyReport[i] = {
@@ -157,7 +165,7 @@ export const managerdashboarddata = async (
       }
     });
 
-    const dailyPerformance = Array.from({ length: daysInMonth }, (_, i) => {
+    const dailyPerformance: Array<{ day: number; cost: number; meals: number }> = Array.from({ length: daysInMonth }, (_, i) => {
       const dayNum = i + 1;
       return {
         day: dayNum,
@@ -167,7 +175,7 @@ export const managerdashboarddata = async (
     });
 
     const weeksInMonth = 4;
-    const weeklyMealBreakdown = [];
+    const weeklyMealBreakdown: Array<{ week: string; breakfast: number; lunch: number; dinner: number }> = [];
 
     for (let i = 0; i < weeksInMonth; i++) {
       weeklyMealBreakdown.push({
@@ -238,7 +246,7 @@ export const managerdashboarddata = async (
     const costChange = previousTotalCost > 0 ? ((totalCost - previousTotalCost) / previousTotalCost) * 100 : 0;
     const mealChange = previousTotalMeal > 0 ? ((totalMeal - previousTotalMeal) / previousTotalMeal) * 100 : 0;
 
-    const mealRateHistory = [];
+    const mealRateHistory: Array<{ week: string; rate: number }> = [];
 
     for (let i = 0; i < weeksInMonth; i++) {
       const weekMeals = weeklyMealBreakdown[i].breakfast + weeklyMealBreakdown[i].lunch + weeklyMealBreakdown[i].dinner;
@@ -246,7 +254,7 @@ export const managerdashboarddata = async (
       
       if (weekMeals > 0) {
         const weeklyCost = dailyPerformance
-          .filter(d => {
+          .filter((d) => {
             let weekIdx = Math.floor((d.day - 1) / 7);
             if (weekIdx >= weeksInMonth) weekIdx = weeksInMonth - 1;
             return weekIdx === i;
