@@ -5,8 +5,6 @@ import React, { useState, useEffect } from "react";
 
 import { FiDollarSign, FiCoffee, FiUsers, FiBarChart2 } from "react-icons/fi";
 import { DashboardData } from "@/Types/managerdashboard";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { MonthSelector } from "./MonthSelector";
 import { StatsCard } from "./StatsCards";
 import { MealDistributionChart } from "./MealDistributionChart";
 import { WeeklyMealBreakdown } from "./WeeklyMealBreakdown";
@@ -14,6 +12,8 @@ import { MealRateTrend } from "./MealRateTrend";
 import { QuickSummary } from "./QuickSummary";
 import { PerformanceMetrics } from "./PerformanceMetrics";
 import { managerdashboarddata } from "@/server/dashboard/managerdashboard";
+import { LoadingSpinner } from "../LoadingSpinner";
+import { MonthSelector } from "../MonthSelector";
 
 const Managerdashboard = () => {
   const currentDate = new Date();

@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { memberdashboarddata } from "@/server/dashboard/memberdashboard";
 import { FiDollarSign, FiCoffee, FiTrendingUp } from "react-icons/fi";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { MonthSelector } from "./MonthSelector";
+import { LoadingSpinner } from "../LoadingSpinner";
+import { MonthSelector } from "../MonthSelector";
 import { StatsCard } from "./StatsCard";
 import { DueCard } from "./DueCard";
 import { DailyMealTrend } from "./DailyMealTrend";
