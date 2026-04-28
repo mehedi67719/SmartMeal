@@ -1,7 +1,7 @@
 
 "use client";
 import React, { useState, useEffect } from "react";
-import { managerdashboarddata } from "@/server/managerdashboard/managerdashboard";
+
 
 import { FiDollarSign, FiCoffee, FiUsers, FiBarChart2 } from "react-icons/fi";
 import { DashboardData } from "@/Types/managerdashboard";
@@ -13,6 +13,7 @@ import { WeeklyMealBreakdown } from "./WeeklyMealBreakdown";
 import { MealRateTrend } from "./MealRateTrend";
 import { QuickSummary } from "./QuickSummary";
 import { PerformanceMetrics } from "./PerformanceMetrics";
+import { managerdashboarddata } from "@/server/dashboard/managerdashboard";
 
 const Managerdashboard = () => {
   const currentDate = new Date();
