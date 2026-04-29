@@ -1,0 +1,40 @@
+"use client";
+import React from "react";
+
+interface QuickStatsProps {
+  collectionRate: number;
+  avgMealPerMember: number;
+  avgCostPerMember: number;
+  activeRate: number;
+}
+
+export const QuickStats: React.FC<QuickStatsProps> = ({
+  collectionRate,
+  avgMealPerMember,
+  avgCostPerMember,
+  activeRate,
+}) => {
+  return (
+    <div className="mt-6 md:mt-8 bg-white rounded-xl md:rounded-2xl shadow-md p-4 md:p-6 border border-gray-100">
+      <h3 className="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">Quick Stats</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="text-center p-2 md:p-3 bg-emerald-50 rounded-xl">
+          <p className="text-[10px] md:text-xs text-gray-600">Collection Rate</p>
+          <p className="text-lg md:text-2xl font-bold text-emerald-700">{collectionRate.toFixed(1)}%</p>
+        </div>
+        <div className="text-center p-2 md:p-3 bg-orange-50 rounded-xl">
+          <p className="text-[10px] md:text-xs text-gray-600">Avg Meal/Member</p>
+          <p className="text-lg md:text-2xl font-bold text-orange-700">{avgMealPerMember}</p>
+        </div>
+        <div className="text-center p-2 md:p-3 bg-blue-50 rounded-xl">
+          <p className="text-[10px] md:text-xs text-gray-600">Avg Cost/Member</p>
+          <p className="text-lg md:text-2xl font-bold text-blue-700">৳{avgCostPerMember.toLocaleString()}</p>
+        </div>
+        <div className="text-center p-2 md:p-3 bg-purple-50 rounded-xl">
+          <p className="text-[10px] md:text-xs text-gray-600">Active Rate</p>
+          <p className="text-lg md:text-2xl font-bold text-purple-700">{activeRate.toFixed(0)}%</p>
+        </div>
+      </div>
+    </div>
+  );
+};
