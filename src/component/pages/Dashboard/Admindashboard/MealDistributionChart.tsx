@@ -38,6 +38,13 @@ export const MealDistributionChart: React.FC<MealDistributionChartProps> = ({
     { name: "Dinner", value: dinnerCount || 0, color: "#059669" },
   ];
 
+  const total = breakfastCount + lunchCount + dinnerCount;
+
+  const renderLabel = (entry: any) => {
+    const percentage = total > 0 ? ((entry.value / total) * 100).toFixed(0) : "0";
+    return isMobile ? `${percentage}%` : `${entry.name} ${percentage}%`;
+  };
+
   return (
     <div className="bg-white rounded-xl md:rounded-2xl shadow-md p-4 md:p-6 border border-gray-100">
       <h3 className="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4 flex items-center gap-2">
@@ -54,7 +61,7 @@ export const MealDistributionChart: React.FC<MealDistributionChartProps> = ({
               outerRadius={isMobile ? 70 : 100}
               paddingAngle={3}
               dataKey="value"
-              label={({ name, percent }) => isMobile ? `${(percent * 100).toFixed(0)}%` : `${name} ${(percent * 100).toFixed(0)}%`}
+              label={renderLabel}
               labelLine={{ strokeWidth: 1 }}
             >
               {data.map((entry, index) => (
