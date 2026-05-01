@@ -21,6 +21,18 @@ import { MonthSelector } from "@/component/pages/Dashboard/MonthSelector";
 import { StatsCard } from "@/component/Allusersmealstatus/StatsCard";
 import { UserTableRow } from "@/component/Allusersmealstatus/UserTableRow";
 
+interface UserType {
+  id: string;
+  name: string;
+  email: string;
+  accountType: string;
+  totalBreakfast: number;
+  totalLunch: number;
+  totalDinner: number;
+  totalMeals: number;
+  dailyMeals: any[];
+}
+
 const AllUsersMealStatus = () => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
@@ -73,7 +85,7 @@ const AllUsersMealStatus = () => {
 
       if (mealDetails?.success && mealDetails?.data?.users) {
         const initialStatus: { [key: string]: boolean } = {};
-        mealDetails.data.users.forEach((user: any) => {
+        mealDetails.data.users.forEach((user: UserType) => {
           initialStatus[user.email] = user.totalMeals > 0;
         });
         setUserMealStatus(initialStatus);
@@ -136,7 +148,7 @@ const AllUsersMealStatus = () => {
       setUserMealStatus((prev) => ({ ...prev, [userEmail]: newStatus }));
 
       if (data?.data?.users) {
-        const updatedUsers = data.data.users.map((user: any) => {
+        const updatedUsers = data.data.users.map((user: UserType) => {
           if (user.email === userEmail) {
             return { ...user, adminMealStatus: newStatus };
           }
@@ -162,35 +174,30 @@ const AllUsersMealStatus = () => {
     setUpdating(null);
   };
 
-  // ফিক্স: সঠিক টগল ফাংশন
   const toggleExpandUser = useCallback((userId: string) => {
-    console.log("Toggling user:", userId);
-    console.log("Current expanded:", expandedUser);
     setExpandedUser((prev) => {
       if (prev === userId) {
-        console.log("Hiding details for:", userId);
         return null;
       } else {
-        console.log("Showing details for:", userId);
         return userId;
       }
     });
   }, []);
 
-  const filteredUsers =
+  const filteredUsers: UserType[] =
     data?.data?.users?.filter(
-      (user: any) =>
+      (user: UserType) =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase()),
     ) || [];
 
   const totalMeals = filteredUsers.reduce(
-    (sum: number, u: any) => sum + u.totalMeals,
+    (sum: number, u: UserType) => sum + u.totalMeals,
     0,
   );
   const totalCost = totalMeals * mealRate;
-  const totalDeposit = Object.values(userDeposits).reduce((a, b) => a + b, 0);
-  const activeUsers = filteredUsers.filter((u: any) =>
+  const totalDeposit = Object.values(userDeposits).reduce((a: number, b: number) => a + b, 0);
+  const activeUsers = filteredUsers.filter((u: UserType) =>
     isUserActive(u.email),
   ).length;
 
@@ -213,7 +220,7 @@ const AllUsersMealStatus = () => {
   }
 
   return (
-    <div className="min-h-screen container">
+    <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
@@ -238,7 +245,6 @@ const AllUsersMealStatus = () => {
             <MonthSelector
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
-              months={months}
               onMonthChange={setSelectedMonth}
               onYearChange={setSelectedYear}
               onPrevMonth={handlePrevMonth}
@@ -321,7 +327,7 @@ const AllUsersMealStatus = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user: any) => {
+                {filteredUsers.map((user: UserType) => {
                   const userCost = user.totalMeals * mealRate;
                   const userDeposit = userDeposits[user.email] || 0;
                   const userDue = userCost - userDeposit;
@@ -348,13 +354,13 @@ const AllUsersMealStatus = () => {
                 <tr>
                   <td className="py-3 px-4 text-gray-800">Total</td>
                   <td className="text-center py-3 px-4 text-amber-600">
-                    {filteredUsers.reduce((s, u) => s + u.totalBreakfast, 0)}
+                    {filteredUsers.reduce((sum: number, u: UserType) => sum + u.totalBreakfast, 0)}
                   </td>
                   <td className="text-center py-3 px-4 text-orange-600">
-                    {filteredUsers.reduce((s, u) => s + u.totalLunch, 0)}
+                    {filteredUsers.reduce((sum: number, u: UserType) => sum + u.totalLunch, 0)}
                   </td>
                   <td className="text-center py-3 px-4 text-teal-600">
-                    {filteredUsers.reduce((s, u) => s + u.totalDinner, 0)}
+                    {filteredUsers.reduce((sum: number, u: UserType) => sum + u.totalDinner, 0)}
                   </td>
                   <td className="text-center py-3 px-4 text-emerald-600">
                     {totalMeals}
