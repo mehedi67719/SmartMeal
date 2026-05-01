@@ -7,11 +7,10 @@ import React from 'react';
 
 const Page = () => {
   const { data: session, status } = useSession();
-  const role = session?.user?.accountType;
+  const role = (session?.user as { accountType?: string })?.accountType || '';
 
   console.log(role);
-  console.log(status); 
-
+  console.log(status);
 
   if (status === "loading") {
     return (
@@ -26,7 +25,6 @@ const Page = () => {
     );
   }
 
-
   if (status === "unauthenticated") {
     return <div>Please login to access this page</div>;
   }
@@ -34,7 +32,7 @@ const Page = () => {
   return (
     <div>
       {role === "member" && <Memberdashboard />}
-      {role === "controller" && <AdminDashboard />}
+      {role === "admin" && <AdminDashboard />}
       {role === "manager" && <Managerdashboard />}
     </div>
   );
