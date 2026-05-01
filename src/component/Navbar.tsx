@@ -24,6 +24,7 @@ import {
 import { PiBowlFoodFill } from 'react-icons/pi';
 import { FaMoneyBill } from 'react-icons/fa';
 import { useSession, signOut } from 'next-auth/react';
+import { GiHotMeal } from 'react-icons/gi';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -58,6 +59,7 @@ const Navbar = () => {
     { name: 'Profile', href: '/profile', icon: UserCircle },
     { name: 'Cost History', href: '/cost-history', icon: History },
     { name: 'All Users', href: '/allusers', icon: Users },
+    { name: 'AllUsers Meals', href: '/allusers-meals', icon: GiHotMeal },
     { name: 'Member Deposit', href: '/member-deposit', icon: DollarSign },
   ];
 

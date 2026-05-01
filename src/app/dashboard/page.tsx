@@ -32,7 +32,7 @@ const Page = () => {
   return (
     <div>
       {role === "member" && <Memberdashboard />}
-      {role === "admin" && <AdminDashboard />}
+      {role === "controller" && <AdminDashboard />}
       {role === "manager" && <Managerdashboard />}
     </div>
   );

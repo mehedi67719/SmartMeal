@@ -33,7 +33,7 @@ export const MembersTable: React.FC<MembersTableProps> = ({
           <FiUsers className="text-emerald-600" /> All Members - Today's Meal Status
         </h3>
         <Link
-          href={`/dashboard/all-users-meals?month=${selectedMonth}&year=${selectedYear}`}
+          href='allusers-meals'
           className="flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-xs md:text-sm"
         >
           <FiEye className="w-4 h-4" />
