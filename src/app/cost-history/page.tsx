@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { FiSearch, FiCalendar, FiUser, FiDollarSign, FiEye } from "react-icons/fi";
+import { FiSearch, FiCalendar, FiUser, FiDollarSign, FiEye, FiRefreshCw } from "react-icons/fi";
 import { allmanager, allmonth, costhistory } from "@/server/Cost/Costhistory";
 
 type CostItem = {
@@ -47,6 +47,7 @@ const Page = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isSessionReady, setIsSessionReady] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -60,18 +61,26 @@ const Page = () => {
   useEffect(() => {
     if (session?.user && isSessionReady) {
       fetchFilters();
-      fetchData();
     }
   }, [session, isSessionReady]);
 
+  useEffect(() => {
+    if (session?.user && isSessionReady) {
+      fetchData();
+    }
+  }, [selectedMonth, selectedManager, session, isSessionReady]);
+
   const fetchFilters = async () => {
     try {
-      const monthResult = await allmonth();
+      const [monthResult, managerResult] = await Promise.all([
+        allmonth(),
+        allmanager()
+      ]);
+      
       if (monthResult.success && monthResult.data) {
         setMonths(monthResult.data);
       }
 
-      const managerResult = await allmanager();
       if (managerResult.success && managerResult.allmanager) {
         setManagers(managerResult.allmanager);
       }
@@ -82,16 +91,22 @@ const Page = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setIsFiltering(true);
     try {
       const filter: any = {};
-      if (selectedMonth && selectedMonth !== "all") {
+      
+      if (selectedMonth && selectedMonth !== "all" && selectedMonth !== "") {
         filter.month = selectedMonth;
       }
-      if (selectedManager && selectedManager !== "all") {
+      
+      if (selectedManager && selectedManager !== "all" && selectedManager !== "") {
         filter.manager = selectedManager;
       }
 
+      console.log("Fetching with filter:", filter);
+
       const result = await costhistory(filter);
+      
       if (result.success && result.data) {
         const formattedData: CostData[] = result.data.map((item: any) => ({
           ...item,
@@ -100,11 +115,23 @@ const Page = () => {
         }));
         setData(formattedData);
         setFilteredData(formattedData);
+        
+        console.log("Fetched data count:", formattedData.length);
+        console.log("Selected manager:", selectedManager);
+        if (selectedManager) {
+          console.log("Data for selected manager:", formattedData.filter(d => d.ManagerName === selectedManager).length);
+        }
+      } else {
+        setData([]);
+        setFilteredData([]);
       }
     } catch (error) {
       console.error("Error fetching cost history:", error);
+      setData([]);
+      setFilteredData([]);
     } finally {
       setLoading(false);
+      setIsFiltering(false);
     }
   };
 
@@ -113,21 +140,34 @@ const Page = () => {
     
     if (searchTerm) {
       filtered = filtered.filter(item =>
-        item.ManagerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.buyer.toLowerCase().includes(searchTerm.toLowerCase())
+        item.ManagerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.buyer?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
     setFilteredData(filtered);
   }, [searchTerm, data]);
 
-  const handleFilterChange = () => {
-    fetchData();
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedMonth(value);
+  };
+
+  const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    console.log("Manager selected:", value);
+    setSelectedManager(value);
+  };
+
+  const handleResetFilters = () => {
+    setSelectedMonth("");
+    setSelectedManager("");
+    setSearchTerm("");
   };
 
   const getTotalAmount = () => {
-    return filteredData.reduce((sum, item) => sum + item.grandTotal, 0);
+    return filteredData.reduce((sum, item) => sum + (item.grandTotal || 0), 0);
   };
 
   if (status === 'loading' || !isSessionReady) {
@@ -166,7 +206,7 @@ const Page = () => {
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                 <FiCalendar className="text-green-600" />
@@ -174,10 +214,7 @@ const Page = () => {
               </label>
               <select
                 value={selectedMonth}
-                onChange={(e) => {
-                  setSelectedMonth(e.target.value);
-                  setTimeout(handleFilterChange, 0);
-                }}
+                onChange={handleMonthChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="">All Months</option>
@@ -196,10 +233,7 @@ const Page = () => {
               </label>
               <select
                 value={selectedManager}
-                onChange={(e) => {
-                  setSelectedManager(e.target.value);
-                  setTimeout(handleFilterChange, 0);
-                }}
+                onChange={handleManagerChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="">All Managers</option>
@@ -223,6 +257,16 @@ const Page = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               />
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={handleResetFilters}
+                className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <FiRefreshCw />
+                Reset Filters
+              </button>
             </div>
           </div>
         </div>
@@ -323,6 +367,14 @@ const Page = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+        
+      
+        {selectedManager && !loading && (
+          <div className="mt-4 text-center text-sm text-gray-500">
+            Showing {filteredData.length} entries for manager: <strong>{selectedManager}</strong>
+            {selectedMonth && ` in ${selectedMonth}`}
           </div>
         )}
       </div>

@@ -81,11 +81,11 @@ export const allmonth = async (): Promise<MonthResponse> => {
       .find<{ month: string }>({ secretCode: userSecretCode }, { projection: { month: 1, _id: 0 } })
       .toArray();
 
-    const month = [...new Set(result.map((item) => item.month))];
+    const months = [...new Set(result.map((item) => item.month))];
 
     return {
       status: 200,
-      data: month,
+      data: months,
       success: true,
     };
   } catch {
@@ -121,18 +121,21 @@ export const allmanager = async (): Promise<ManagerResponse> => {
 
     const costcollection = await dbconnect("cost");
 
-    const result = await costcollection
-      .find<{ ManagerName: string }>({ secretCode: userSecretCode }, { projection: { ManagerName: 1, _id: 0 } })
-      .toArray();
+    const result = await costcollection.aggregate([
+      { $match: { secretCode: userSecretCode } },
+      { $group: { _id: "$ManagerName" } },
+      { $sort: { _id: 1 } }
+    ]).toArray();
 
-    const allmanager = [...new Set(result.map((item) => item.ManagerName))];
+    const allmanager = result.map((item) => item._id).filter(name => name && name !== "" && name !== null);
 
     return {
-      allmanager,
       status: 200,
       success: true,
+      allmanager: allmanager,
     };
-  } catch {
+  } catch (error) {
+    console.error("Error fetching managers:", error);
     return {
       status: 500,
       success: false,
@@ -171,22 +174,27 @@ export const costhistory = async (
 
     const query: any = { secretCode: userSecretCode };
 
-    if (month && month !== "all") {
+    if (month && month !== "all" && month !== "") {
       query.month = month;
     }
 
-    if (manager && manager !== "all") {
+    if (manager && manager !== "all" && manager !== "") {
       query.ManagerName = manager;
     }
 
-    const result = await costcollection.find<CostData>(query).toArray();
+    console.log("Query:", JSON.stringify(query)); // Debug log
+
+    const result = await costcollection.find<CostData>(query).sort({ date: -1 }).toArray();
+
+    console.log("Result count:", result.length); // Debug log
 
     return {
       status: 200,
       data: result,
       success: true,
     };
-  } catch {
+  } catch (error) {
+    console.error("Error fetching cost history:", error);
     return {
       status: 500,
       success: false,

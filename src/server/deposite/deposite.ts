@@ -1,6 +1,8 @@
 "use server"
 import { dbconnect } from "@/lib/dbconnect";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/Authoptions";
 
 interface DepositData {
     userId: string;
@@ -19,8 +21,44 @@ interface DepositResult {
     error?: string;
 }
 
+const checkAuthorization = async (): Promise<{ authorized: boolean; secretCode?: string; role?: string; error?: string }> => {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+        return { authorized: false, error: "Unauthorized: Please login first" };
+    }
+
+    const currentUser = session.user as any;
+    const userRole = currentUser?.accountType;
+    const userSecretCode = currentUser?.secretCode;
+
+    if (userRole !== "controller" && userRole !== "manager") {
+        return { authorized: false, error: "Access denied: Only manager and controller can perform this action" };
+    }
+
+    if (!userSecretCode) {
+        return { authorized: false, error: "Secret code not found" };
+    }
+
+    return { authorized: true, secretCode: userSecretCode, role: userRole };
+};
+
 export const deposit = async (amount: number, user: any, month: string, secretCode: string): Promise<DepositResult> => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            return { success: false, error: auth.error };
+        }
+
+        if (secretCode !== auth.secretCode) {
+            return { success: false, error: "Invalid secret code" };
+        }
+
+        if (secretCode !== user.secretCode) {
+            return { success: false, error: "User secret code mismatch" };
+        }
+
         if (!amount || amount <= 0) {
             return { success: false, error: "Invalid amount" };
         }
@@ -31,14 +69,6 @@ export const deposit = async (amount: number, user: any, month: string, secretCo
         
         if (!month) {
             return { success: false, error: "Month is required" };
-        }
-        
-        if (!secretCode) {
-            return { success: false, error: "Secret code is required" };
-        }
-        
-        if (secretCode !== user.secretCode) {
-            return { success: false, error: "Invalid secret code" };
         }
         
         const depositCollection = await dbconnect("deposite");
@@ -65,6 +95,12 @@ export const deposit = async (amount: number, user: any, month: string, secretCo
 
 export const getDeposits = async (secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            throw new Error(auth.error);
+        }
+
         if (!secretCode) {
             throw new Error("Secret code is required");
         }
@@ -80,6 +116,12 @@ export const getDeposits = async (secretCode: string) => {
 
 export const getDepositsByMonth = async (month: string, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            throw new Error(auth.error);
+        }
+
         if (!month || !secretCode) {
             throw new Error("Month and secret code are required");
         }
@@ -98,6 +140,12 @@ export const getDepositsByMonth = async (month: string, secretCode: string) => {
 
 export const getUserDepositsByMonth = async (userId: string, month: string, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            throw new Error(auth.error);
+        }
+
         if (!userId || !month || !secretCode) {
             throw new Error("User ID, month, and secret code are required");
         }
@@ -117,6 +165,12 @@ export const getUserDepositsByMonth = async (userId: string, month: string, secr
 
 export const getTotalUserDeposit = async (userId: string, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            return 0;
+        }
+
         if (!userId || !secretCode) {
             return 0;
         }
@@ -136,6 +190,12 @@ export const getTotalUserDeposit = async (userId: string, secretCode: string) =>
 
 export const getTotalUserDepositByMonth = async (userId: string, month: string, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            return 0;
+        }
+
         if (!userId || !month || !secretCode) {
             return 0;
         }
@@ -155,6 +215,12 @@ export const getTotalUserDepositByMonth = async (userId: string, month: string, 
 
 export const updateDeposit = async (depositId: string, amount: number, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            return { success: false, error: auth.error };
+        }
+
         if (!depositId || !amount || !secretCode) {
             return { success: false, error: "Deposit ID, amount, and secret code are required" };
         }
@@ -184,6 +250,12 @@ export const updateDeposit = async (depositId: string, amount: number, secretCod
 
 export const deleteDeposit = async (depositId: string, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            return { success: false, error: auth.error };
+        }
+
         if (!depositId || !secretCode) {
             return { success: false, error: "Deposit ID and secret code are required" };
         }
@@ -213,6 +285,12 @@ export const deleteDeposit = async (depositId: string, secretCode: string) => {
 
 export const getTotalDepositsByMonth = async (month: string, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            return 0;
+        }
+
         if (!month || !secretCode) {
             return 0;
         }
@@ -232,6 +310,12 @@ export const getTotalDepositsByMonth = async (month: string, secretCode: string)
 
 export const getAllUserDeposits = async (userId: string, secretCode: string) => {
     try {
+        const auth = await checkAuthorization();
+        
+        if (!auth.authorized) {
+            throw new Error(auth.error);
+        }
+
         if (!userId || !secretCode) {
             throw new Error("User ID and secret code are required");
         }
