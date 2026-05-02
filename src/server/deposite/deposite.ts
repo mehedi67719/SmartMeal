@@ -33,7 +33,11 @@ export const deposit = async (amount: number, user: any, month: string, secretCo
             return { success: false, error: "Month is required" };
         }
         
-        if (!secretCode || secretCode !== user.secretCode) {
+        if (!secretCode) {
+            return { success: false, error: "Secret code is required" };
+        }
+        
+        if (secretCode !== user.secretCode) {
             return { success: false, error: "Invalid secret code" };
         }
         
@@ -61,6 +65,10 @@ export const deposit = async (amount: number, user: any, month: string, secretCo
 
 export const getDeposits = async (secretCode: string) => {
     try {
+        if (!secretCode) {
+            throw new Error("Secret code is required");
+        }
+        
         const depositCollection = await dbconnect("deposite");
         const deposits = await depositCollection.find({ secretCode: secretCode }).sort({ date: -1 }).toArray();
         return deposits;
@@ -72,8 +80,15 @@ export const getDeposits = async (secretCode: string) => {
 
 export const getDepositsByMonth = async (month: string, secretCode: string) => {
     try {
+        if (!month || !secretCode) {
+            throw new Error("Month and secret code are required");
+        }
+        
         const depositCollection = await dbconnect("deposite");
-        const deposits = await depositCollection.find({ month: month, secretCode: secretCode }).sort({ date: -1 }).toArray();
+        const deposits = await depositCollection.find({ 
+            month: month, 
+            secretCode: secretCode 
+        }).sort({ date: -1 }).toArray();
         return deposits;
     } catch (error) {
         console.error("Error fetching deposits by month:", error);
@@ -83,6 +98,10 @@ export const getDepositsByMonth = async (month: string, secretCode: string) => {
 
 export const getUserDepositsByMonth = async (userId: string, month: string, secretCode: string) => {
     try {
+        if (!userId || !month || !secretCode) {
+            throw new Error("User ID, month, and secret code are required");
+        }
+        
         const depositCollection = await dbconnect("deposite");
         const deposits = await depositCollection.find({ 
             userId: userId, 
@@ -98,6 +117,10 @@ export const getUserDepositsByMonth = async (userId: string, month: string, secr
 
 export const getTotalUserDeposit = async (userId: string, secretCode: string) => {
     try {
+        if (!userId || !secretCode) {
+            return 0;
+        }
+        
         const depositCollection = await dbconnect("deposite");
         const result = await depositCollection.aggregate([
             { $match: { userId: userId, secretCode: secretCode } },
@@ -113,6 +136,10 @@ export const getTotalUserDeposit = async (userId: string, secretCode: string) =>
 
 export const getTotalUserDepositByMonth = async (userId: string, month: string, secretCode: string) => {
     try {
+        if (!userId || !month || !secretCode) {
+            return 0;
+        }
+        
         const depositCollection = await dbconnect("deposite");
         const result = await depositCollection.aggregate([
             { $match: { userId: userId, month: month, secretCode: secretCode } },
@@ -128,12 +155,19 @@ export const getTotalUserDepositByMonth = async (userId: string, month: string, 
 
 export const updateDeposit = async (depositId: string, amount: number, secretCode: string) => {
     try {
+        if (!depositId || !amount || !secretCode) {
+            return { success: false, error: "Deposit ID, amount, and secret code are required" };
+        }
+        
         const depositCollection = await dbconnect("deposite");
         
-        const deposit = await depositCollection.findOne({ _id: new ObjectId(depositId), secretCode: secretCode });
+        const deposit = await depositCollection.findOne({ 
+            _id: new ObjectId(depositId), 
+            secretCode: secretCode 
+        });
         
         if (!deposit) {
-            return { success: false, error: "Deposit not found" };
+            return { success: false, error: "Deposit not found or unauthorized" };
         }
         
         const result = await depositCollection.updateOne(
@@ -150,15 +184,25 @@ export const updateDeposit = async (depositId: string, amount: number, secretCod
 
 export const deleteDeposit = async (depositId: string, secretCode: string) => {
     try {
-        const depositCollection = await dbconnect("deposite");
-        
-        const deposit = await depositCollection.findOne({ _id: new ObjectId(depositId), secretCode: secretCode });
-        
-        if (!deposit) {
-            return { success: false, error: "Deposit not found" };
+        if (!depositId || !secretCode) {
+            return { success: false, error: "Deposit ID and secret code are required" };
         }
         
-        const result = await depositCollection.deleteOne({ _id: new ObjectId(depositId), secretCode: secretCode });
+        const depositCollection = await dbconnect("deposite");
+        
+        const deposit = await depositCollection.findOne({ 
+            _id: new ObjectId(depositId), 
+            secretCode: secretCode 
+        });
+        
+        if (!deposit) {
+            return { success: false, error: "Deposit not found or unauthorized" };
+        }
+        
+        const result = await depositCollection.deleteOne({ 
+            _id: new ObjectId(depositId), 
+            secretCode: secretCode 
+        });
         
         return { success: true, data: result };
     } catch (error) {
@@ -169,6 +213,10 @@ export const deleteDeposit = async (depositId: string, secretCode: string) => {
 
 export const getTotalDepositsByMonth = async (month: string, secretCode: string) => {
     try {
+        if (!month || !secretCode) {
+            return 0;
+        }
+        
         const depositCollection = await dbconnect("deposite");
         const result = await depositCollection.aggregate([
             { $match: { month: month, secretCode: secretCode } },
@@ -184,8 +232,15 @@ export const getTotalDepositsByMonth = async (month: string, secretCode: string)
 
 export const getAllUserDeposits = async (userId: string, secretCode: string) => {
     try {
+        if (!userId || !secretCode) {
+            throw new Error("User ID and secret code are required");
+        }
+        
         const depositCollection = await dbconnect("deposite");
-        const deposits = await depositCollection.find({ userId: userId, secretCode: secretCode }).sort({ date: -1 }).toArray();
+        const deposits = await depositCollection.find({ 
+            userId: userId, 
+            secretCode: secretCode 
+        }).sort({ date: -1 }).toArray();
         return deposits;
     } catch (error) {
         console.error("Error fetching user deposits:", error);

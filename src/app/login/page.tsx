@@ -4,13 +4,17 @@ import React, { useState } from 'react';
 import { FiMail, FiLock, FiLogIn, FiEye, FiEyeOff } from 'react-icons/fi';
 import { FaUtensils, FaHamburger, FaPizzaSlice, FaFish, FaLeaf, FaCookie } from 'react-icons/fa';
 import { signIn } from 'next-auth/react';
+import Swal from 'sweetalert2';
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
+    const router = useRouter();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -20,8 +24,20 @@ const Login = () => {
         });
     };
 
-    const handleSubmit =async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLoading(true);
+
+        if (!formData.email || !formData.password) {
+            Swal.fire({
+                icon: "error",
+                title: "Missing Information",
+                text: "Please enter both email and password",
+                confirmButtonColor: "#059669"
+            });
+            setLoading(false);
+            return;
+        }
 
         const result = await signIn('credentials', {
             redirect: false,
@@ -30,11 +46,28 @@ const Login = () => {
         });
 
         if (result?.error) {
-            alert('Invalid email or password');
+            Swal.fire({
+                icon: "error",
+                title: "Login Failed",
+                text: "Invalid email or password. Please try again.",
+                confirmButtonColor: "#059669"
+            });
+            setLoading(false);
         } else {
-            window.location.href = '/';
+            Swal.fire({
+                icon: "success",
+                title: "Welcome Back!",
+                text: "You have successfully logged in.",
+                timer: 2000,
+                showConfirmButton: false,
+                background: "#ffffff",
+                color: "#1f2937"
+            });
+            
+            setTimeout(() => {
+                router.push('/');
+            }, 2000);
         }
-
     };
 
     const foodIcons = [
@@ -130,6 +163,7 @@ const Login = () => {
                                             className="w-full pl-10 pr-3 py-2.5 rounded-xl border-2 border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 transition-all duration-200 focus:outline-none text-sm"
                                             value={formData.email}
                                             onChange={handleChange}
+                                            disabled={loading}
                                         />
                                     </div>
                                 </div>
@@ -148,6 +182,7 @@ const Login = () => {
                                             className="w-full pl-10 pr-10 py-2.5 rounded-xl border-2 border-gray-200 bg-gray-50 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200 transition-all duration-200 focus:outline-none text-sm"
                                             value={formData.password}
                                             onChange={handleChange}
+                                            disabled={loading}
                                         />
                                         <button
                                             type="button"
@@ -161,10 +196,11 @@ const Login = () => {
 
                                 <button
                                     type="submit"
-                                    className="w-full py-3 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 text-white font-bold text-sm rounded-xl hover:from-emerald-700 hover:via-green-700 hover:to-emerald-800 transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30"
+                                    disabled={loading}
+                                    className="w-full py-3 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 text-white font-bold text-sm rounded-xl hover:from-emerald-700 hover:via-green-700 hover:to-emerald-800 transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 >
                                     <FiLogIn className="w-4 h-4" />
-                                    Sign In
+                                    {loading ? "Signing In..." : "Sign In"}
                                 </button>
 
                                 <p className="text-center text-gray-600 text-xs font-medium pt-2">

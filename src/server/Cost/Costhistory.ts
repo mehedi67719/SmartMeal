@@ -56,8 +56,6 @@ type FilterType = {
 export const allmonth = async (): Promise<MonthResponse> => {
   try {
     const session = await getServerSession(authOptions);
-
-    // console.log(session)
     
     if (!session) {
       return {

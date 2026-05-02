@@ -1,6 +1,8 @@
-"use server"
+"use server";
 import { dbconnect } from "@/lib/dbconnect";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/Authoptions";
 
 interface User {
   _id: string;
@@ -21,10 +23,33 @@ interface ApiResponse<T> {
 
 export const alluser = async (): Promise<ApiResponse<User[]>> => {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return {
+        status: 401,
+        data: [],
+        success: false,
+        message: "Unauthorized"
+      };
+    }
+
+    const userSecretCode = (session.user as any)?.secretCode;
+    
+    if (!userSecretCode) {
+      return {
+        status: 401,
+        data: [],
+        success: false,
+        message: "Secret code not found"
+      };
+    }
+
     const usercollection = await dbconnect("users");
 
-    const users = await usercollection.find({}).toArray();
-    
+    const users = await usercollection.find({ 
+      secretCode: userSecretCode 
+    }).toArray();
 
     const serializedUsers: User[] = users.map(user => ({
       _id: user._id.toString(),
