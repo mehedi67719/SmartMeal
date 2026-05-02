@@ -1,36 +1,209 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+  <img src="https://img.icons8.com/fluency/96/meal.png" width="100"/>
 
-First, run the development server:
+# 🍽️ SmartMeal (MealBoard)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### *Modern Full-Stack Meal Management System*
+
+**Next.js 16 • MongoDB • NextAuth • Tailwind CSS • DaisyUI**
+
+<br/>
+
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-View_Now-00A86B?style=for-the-badge\&logo=vercel\&logoColor=white)](https://smart-meal-beta-nine.vercel.app/)
+
+</div>
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+| 🔐 Register                                                                                        | 📊 Controller Dashboard                                                                            | 👨‍💻 Manager Dashboard                                                                            |
+| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| ![](https://github.com/mehedi67719/assets/blob/main/Screenshot%202026-05-02%20201446.png?raw=true) | ![](https://github.com/mehedi67719/assets/blob/main/Screenshot%202026-05-02%20201350.png?raw=true) | ![](https://github.com/mehedi67719/assets/blob/main/Screenshot%202026-05-02%20201518.png?raw=true) |
+
+| 💰 Cost                                                                                            | 💳 Meal ON/OFF                                                                                     | 🤖 AI                                    |
+| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| ![](https://github.com/mehedi67719/assets/blob/main/Screenshot%202026-05-02%20201249.png?raw=true) | ![](https://github.com/mehedi67719/assets/blob/main/Screenshot%202026-05-02%20201221.png?raw=true) | ![](https://via.placeholder.com/300x200) |
+
+</div>
+
+---
+
+## ✨ Features
+
+* 🔐 Authentication (NextAuth)
+* 👥 Role-based system
+* 📅 Meal tracking system
+* 💰 Cost management
+* 💳 Deposit system
+* 📊 Smart dashboards
+* 🧮 Meal calculator
+* 🤖 Health AI chatbot
+
+---
+
+## 👨‍💼 Roles & Permissions
+
+<div align="center">
+
+### 🧑‍✈️ Controller (Admin)
+
+| Feature              | Access               |
+| -------------------- | -------------------- |
+| 🔐 Secure Register   | Secret Code Required |
+| 👨‍💻 Assign Manager | Yes                  |
+| 👥 Manage Users      | Full Access          |
+| 🍛 Meal Control      | ON/OFF Any User      |
+| 📊 Full Analytics    | Yes                  |
+
+---
+
+### 🧑‍💻 Manager
+
+| Feature            | Access |
+| ------------------ | ------ |
+| 💰 Add Cost        | Daily  |
+| 📊 Cost History    | Yes    |
+| 💳 Add Deposit     | Yes    |
+| 📜 Deposit History | Yes    |
+| 📈 Dashboard       | Full   |
+
+---
+
+### 🙋 Member
+
+| Feature         | Access                 |
+| --------------- | ---------------------- |
+| 📝 Register     | Personal Info Required |
+| 🏷️ Mess Select | Select Mess Name       |
+| 🔐 Secret Code  | Required               |
+| 🍽️ Meal Toggle | ON/OFF                 |
+| 📊 Dashboard    | Personal               |
+
+</div>
+
+---
+
+## 🔄 System Flow
+
+```mermaid
+flowchart TD
+A[Register] --> B[Enter Info]
+B --> C[Select Mess Name]
+C --> D[Enter Secret Code]
+D --> E[Join System]
+E --> F[Meal ON/OFF]
+F --> G[Manager Adds Cost]
+G --> H[Deposit Added]
+H --> I[Dashboard Analytics]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📊 Dashboards
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 👤 Member
 
-## Learn More
+* Total Meals
+* Total Cost
+* Total Deposit
 
-To learn more about Next.js, take a look at the following resources:
+### 👨‍💻 Manager
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* Today Meals
+* Total Meals
+* Total Cost
+* Total Deposit
+* Meal Rate
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🧑‍✈️ Controller
 
-## Deploy on Vercel
+* Total Users
+* Total Meals
+* Total Cost
+* Total Deposit
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧮 Meal Calculator
+
+* Auto Meal Count
+* Meal Rate
+* Individual Cost
+
+---
+
+## 🤖 Health AI
+
+* Ask health questions
+* Get instant answers
+
+---
+
+## 🛠️ Tech Stack
+
+* ⚛️ Next.js 16
+* ⚛️ React 19
+* 🍃 MongoDB
+* 🔐 NextAuth
+* 🎨 Tailwind + DaisyUI
+* 📊 Recharts
+
+---
+
+## ⚙️ Installation
+
+```bash
+git clone https://github.com/mehedi67719/smartmeal.git
+cd smartmeal
+npm install
+npm run dev
+```
+
+---
+
+## 🔐 Environment Variables
+
+```env
+MONGODB_URI=your_uri
+NEXTAUTH_SECRET=your_secret
+NEXTAUTH_URL=http://localhost:3000
+```
+
+---
+
+## 🔑 Demo Login
+
+| Role       | Email                                           | Password   |
+| ---------- | ----------------------------------------------- | ---------- |
+| Controller | [meh67719@gmail.com](mailto:meh67719@gmail.com) | mehedi123  |
+| Manager    | [jubayer@gmail.com](mailto:jubayer@gmail.com)   | jubayer123 |
+| Member     | [tawhid@gmail.com](mailto:tawhid@gmail.com)     | tawhid123  |
+
+---
+
+## 🚀 Future Plan
+
+
+* 🔔 Notification System
+* 📈 Advanced Analytics
+* 🌍 Multi Language
+
+---
+
+## 👨‍💻 Author
+
+**Mehedi Hassan**
+
+* 🌐 Portfolio: https://mehedihassanjashore.netlify.app
+* 💻 GitHub: https://github.com/mehedi67719
+* 🔗 LinkedIn: https://linkedin.com
+
+---
+
+## ⭐ Support
+
+Give a ⭐ if you like this project ❤️
