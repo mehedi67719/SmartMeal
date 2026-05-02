@@ -182,11 +182,11 @@ export const costhistory = async (
       query.ManagerName = manager;
     }
 
-    console.log("Query:", JSON.stringify(query)); // Debug log
+    console.log("Query:", JSON.stringify(query));
 
     const result = await costcollection.find<CostData>(query).sort({ date: -1 }).toArray();
 
-    console.log("Result count:", result.length); // Debug log
+    console.log("Result count:", result.length);
 
     return {
       status: 200,
