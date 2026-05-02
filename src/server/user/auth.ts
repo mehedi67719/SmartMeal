@@ -75,7 +75,7 @@ export const massname = async (): Promise<string[]> => {
     const result = await usercollection.aggregate([
       {
         $match: {
-          messName: { $exists: true, $ne: null, $ne: "" }
+          messName: { $exists: true, $ne: null, $nin: ["", null] }
         }
       },
       {
@@ -91,7 +91,7 @@ export const massname = async (): Promise<string[]> => {
       }
     ]).toArray();
     
-    const messNames = result.map(item => item.messName);
+    const messNames = result.map(item => item.messName).filter(name => name && name !== "");
     
     console.log("Fetched mess names:", messNames);
     
