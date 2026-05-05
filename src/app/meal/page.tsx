@@ -7,6 +7,8 @@ import Mealcart from "@/component/pages/MealPage/Mealcart";
 import AllMealcontrol from "@/component/pages/MealPage/AllMealcontrol";
 import { uploadmeal, getMealByMonth } from "@/server/meal/allmeal";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface MealItem {
   date: number;
@@ -23,6 +25,9 @@ const createDefaultMeal = (date: number): MealItem => ({
 });
 
 const Page = () => {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
   const days = currentmounthdays();
   const [meal, setMeal] = useState<MealItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,38 +35,74 @@ const Page = () => {
   const hasUnsavedChanges = useRef(false);
 
   const today = new Date().getDate();
-  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+  const currentMonth = new Date().toLocaleString("default", { month: "long" });
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
+    if (status === "loading") return;
+
+    if (!session) {
+      router.push("/login");
+    }
+  }, [session, status, router]);
+
+  useEffect(() => {
+    if (!session) return;
+
     const loadMealData = async () => {
       try {
         const result = await getMealByMonth(currentMonth, currentYear);
-        
+
         if (result.success && result.data) {
           const mealsData = result.data.meals || [];
           setMeal(mealsData);
         } else {
-          const defaultMeals = days?.days?.map((day: number) => createDefaultMeal(day)) || [];
+          const defaultMeals =
+            days?.days?.map((day: number) => createDefaultMeal(day)) || [];
           setMeal(defaultMeals);
         }
       } catch (error) {
         console.error("Error loading meal data:", error);
-        const defaultMeals = days?.days?.map((day: number) => createDefaultMeal(day)) || [];
+        const defaultMeals =
+          days?.days?.map((day: number) => createDefaultMeal(day)) || [];
         setMeal(defaultMeals);
       }
     };
 
     loadMealData();
-  }, []);
+  }, [session, currentMonth, currentYear, days]);
 
-  const toggleSingleMeal = (date: number, name: "breakfast" | "lunch" | "dinner") => {
+  useEffect(() => {
+    if (!isFirstRender.current && hasUnsavedChanges.current) {
+      const timeoutId = setTimeout(() => {
+        saveMealData();
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    }
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+    }
+  }, [meal]);
+
+  if (status === "loading") {
+    return <p>Loading...</p>;
+  }
+
+  if (!session) {
+    return null;
+  }
+
+  const toggleSingleMeal = (
+    date: number,
+    name: "breakfast" | "lunch" | "dinner",
+  ) => {
     if (date >= today) {
       hasUnsavedChanges.current = true;
       setMeal((prev) =>
         prev.map((item) =>
-          item.date === date ? { ...item, [name]: !item[name] } : item
-        )
+          item.date === date ? { ...item, [name]: !item[name] } : item,
+        ),
       );
     }
   };
@@ -70,8 +111,8 @@ const Page = () => {
     hasUnsavedChanges.current = true;
     setMeal((prev) =>
       prev.map((item) =>
-        item.date > today ? { ...item, breakfast: !item.breakfast } : item
-      )
+        item.date > today ? { ...item, breakfast: !item.breakfast } : item,
+      ),
     );
   };
 
@@ -79,8 +120,8 @@ const Page = () => {
     hasUnsavedChanges.current = true;
     setMeal((prev) =>
       prev.map((item) =>
-        item.date > today ? { ...item, lunch: !item.lunch } : item
-      )
+        item.date > today ? { ...item, lunch: !item.lunch } : item,
+      ),
     );
   };
 
@@ -88,18 +129,18 @@ const Page = () => {
     hasUnsavedChanges.current = true;
     setMeal((prev) =>
       prev.map((item) =>
-        item.date > today ? { ...item, dinner: !item.dinner } : item
-      )
+        item.date > today ? { ...item, dinner: !item.dinner } : item,
+      ),
     );
   };
 
   const saveMealData = async () => {
     if (loading) return;
     setLoading(true);
-    
+
     try {
       const result = await uploadmeal(meal, currentMonth, currentYear);
-      
+
       if (result.success) {
         hasUnsavedChanges.current = false;
         await Swal.fire({
@@ -134,17 +175,6 @@ const Page = () => {
     }
   };
 
-  useEffect(() => {
-    if (!isFirstRender.current && hasUnsavedChanges.current) {
-      saveMealData();
-    }
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-    }
-  }, [meal]);
-
-  
-
   return (
     <div className="max-w-7xl w-full mx-auto mt-10 px-4">
       <DatePage days={days} />
@@ -178,4 +208,3 @@ const Page = () => {
 };
 
 export default Page;
-
